@@ -1,0 +1,25 @@
+<!doctype html>
+<!-- Store screenshot 1 (1280x800): the demo video in the test harness, real translations from the endpoint given in
+     the query (?endpoint=&model=&key=), shown at 11 s. Taken by tools/screenshots.ps1 with headless Chrome. -->
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; width: 1280px; height: 800px; overflow: hidden; background: #0f0f0f; font-family: "Segoe UI", Roboto, Arial, sans-serif; }
+  h1 { margin: 0; padding: 30px 0 18px; text-align: center; color: #fff; font-size: 34px; font-weight: 600; }
+  h1 span { color: #ffe45c; }
+  iframe { display: block; margin: 0 auto; width: 1120px; height: 640px; border: 0; border-radius: 10px; overflow: hidden; }
+</style>
+</head>
+<body>
+<h1>Phụ đề <span>tiếng Việt</span> ngay trên mọi video YouTube</h1>
+<iframe id="f" scrolling="no"></iframe>
+<script>
+const q = new URLSearchParams(location.search);
+const p = new URLSearchParams({video: '../store/demo/demo.mp4', srt: '../store/demo/demo.en.srt', t: q.get('t') || '11',
+  title: 'Why is the sunset orange?', showEn: 'true', bottom: '9', size: '4.6', endpoint: q.get('endpoint') || '',
+  model: q.get('model') || '', key: q.get('key') || '', clean: '1'});
+document.getElementById('f').src = '../test/harness.html?' + p;
+</script>
+</body>
+</html>

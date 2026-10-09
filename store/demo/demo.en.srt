@@ -1,0 +1,31 @@
+1
+00:00:00,500 --> 00:00:03,500
+Hey everyone, welcome back to the channel.
+
+2
+00:00:03,800 --> 00:00:07,000
+Today we're looking at why the sky turns orange at sunset.
+
+3
+00:00:07,300 --> 00:00:10,500
+When the sun is low, its light travels through more air.
+
+4
+00:00:10,800 --> 00:00:14,000
+Blue light gets scattered away, so the reds and oranges reach your eyes.
+
+5
+00:00:14,300 --> 00:00:17,500
+That effect is called Rayleigh scattering.
+
+6
+00:00:17,800 --> 00:00:21,000
+Dust and smoke in the air can make the colors even stronger.
+
+7
+00:00:21,300 --> 00:00:24,500
+So the next time you see a red sky, you'll know why.
+
+8
+00:00:24,800 --> 00:00:28,000
+If you enjoyed this video, don't forget to subscribe.

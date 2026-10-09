@@ -1,0 +1,62 @@
+<!doctype html>
+<!-- Store screenshot 2 (1280x800): the real popup (src/popup.html + popup.js) with chrome.* answered by a stub, beside
+     the feature list. Taken by tools/screenshots.ps1 with headless Chrome. -->
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; width: 1280px; height: 800px; overflow: hidden; background: linear-gradient(135deg, #141e46, #4a2a6e 55%, #b0563a); font-family: "Segoe UI", Roboto, Arial, sans-serif; }
+  .wrap { display: flex; gap: 56px; padding: 56px 72px; align-items: flex-start; }
+  .text { color: #fff; flex: 1; padding-top: 24px; }
+  .text h1 { font-size: 36px; margin: 0 0 22px; font-weight: 600; }
+  .text li { font-size: 21px; line-height: 1.5; margin: 0 0 12px; color: #f1ecff; }
+  .text li b { color: #ffe45c; font-weight: 600; }
+  iframe { width: 340px; height: 600px; border: 0; border-radius: 12px; box-shadow: 0 18px 50px rgba(0, 0, 0, .45); background: #15171c;
+           transform: scale(1.15); transform-origin: top right; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="text">
+    <h1>Dịch thông minh, theo ngữ cảnh</h1>
+    <ul>
+      <li><b>AI bạn chọn:</b> OpenAI, Gemini, OpenRouter, Ollama, LM Studio, vLLM…</li>
+      <li><b>Dịch trước cả video</b>: câu tiếng Việt có sẵn khi tới lúc hiện.</li>
+      <li><b>Ngữ cảnh:</b> các câu trước, cách xưng hô, thuật ngữ của bạn.</li>
+      <li><b>Tự học thuật ngữ</b> từ chính các câu đã dịch, sửa câu lệch.</li>
+      <li><b>Sửa một câu</b>, app nhớ và áp dụng cho cả video.</li>
+    </ul>
+  </div>
+  <iframe id="p" scrolling="no"></iframe>
+</div>
+<script>
+const later = f => setTimeout(f, 20);
+const status = {
+  vid: 'demoVideo01', title: 'Why is the sunset orange?', mode: 'track', status: 'Đã dịch 8/8 câu',
+  channelId: 'UCdemo', channel: 'Sky Explained',
+  context: {game: 'a YouTube video', self: 'mình', address: 'các bạn', glossary_terms: 1, source: {game: 'auto', pair: 'auto'},
+            auto: {game: 'a YouTube video', viewers: true, conversation: false}, terms: [{en: 'Rayleigh scattering', n: 3}, {en: 'sunset', n: 4}]},
+  learned: [{en: 'scattering', vi: 'tán xạ', support: 4, lines: 5, fixed: 1}],
+  cur: {i: 3, en: 'Blue light gets scattered away, so the reds and oranges reach your eyes.',
+        vi: 'Ánh sáng xanh bị tán xạ mất, nên màu đỏ và cam đến được mắt các bạn.'}
+};
+const stub = {
+  runtime: {lastError: undefined, getManifest: () => ({version: '1.0.0'}), sendMessage: (m, cb) => later(() => cb({}))},
+  storage: {sync: {get: (d, cb) => later(() => cb(Object.assign({}, d, {endpoint: 'https://api.openai.com/v1', model: 'gpt-4o-mini'}))), set: () => {}},
+            local: {get: (k, cb) => later(() => cb(typeof k === 'object' && !Array.isArray(k) ? {apiKey: 'sk-demo-key-not-real'} :
+                     {'ctx:v:demoVideo01': {glossary: 'Rayleigh scattering = tán xạ Rayleigh'}})), set: (o, cb) => cb && cb(), remove: (k, cb) => cb && cb()}},
+  tabs: {query: (q, cb) => later(() => cb([{id: 1}])), sendMessage: (id, m, cb) => later(() => cb(status))},
+  permissions: {request: (o, cb) => cb(true)}
+};
+window.__stub = stub;
+const f = document.getElementById('p');
+fetch('../src/popup.html').then(r => r.text()).then(html => {
+  html = html.replace('<script src="core.js"><\/script>', '').replace('<script src="popup.js"><\/script>', '')
+             .replace('</body>', '<script>window.chrome = parent.__stub;<\/script>' +
+                                  '<script src="../src/words.js"><\/script><script src="../src/core.js"><\/script>' +
+                                  '<script src="../src/popup.js"><\/script></body>').replace('src="../icons/', 'src="../icons/');
+  f.srcdoc = html.replace('<head>', '<head><base href="' + new URL('../src/', location.href) + '">');
+});
+</script>
+</body>
+</html>

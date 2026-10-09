@@ -1,0 +1,21 @@
+/* The Vietnamese line over the YouTube player. Size, position, colour and box opacity are set from the settings. */
+.livesub-box {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 86%;
+  padding: 0.18em 0.6em 0.22em;
+  border-radius: 0.25em;
+  z-index: 60;
+  pointer-events: none;
+  text-align: center;
+  font-family: "Roboto", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.28;
+  text-shadow: 0 0 2px #000, 0 0 3px #000, 1px 1px 2px #000;
+}
+.livesub-vi { font-weight: 600; white-space: pre-wrap; }
+.livesub-en { font-size: 0.66em; opacity: 0.8; margin-top: 0.15em; }
+.livesub-box.livesub-pending .livesub-vi { opacity: 0.55; font-style: italic; font-weight: 400; }
+
+/* YouTube's own captions stay in the page (read when there is no track) but are not shown */
+.livesub-hide-yt .ytp-caption-window-container { opacity: 0 !important; }

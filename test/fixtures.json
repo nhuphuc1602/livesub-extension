@@ -1,0 +1,755 @@
+{
+ "prompts": [
+  {
+   "en": "Where were you last night?",
+   "kw": {
+    "game": "a YouTube video"
+   },
+   "out": "Translate the following text into Vietnamese. Note that you should only output the translated result without any additional explanation:\n\nWhere were you last night?"
+  },
+  {
+   "en": "I told you, I was working.",
+   "kw": {
+    "history": [
+     "Where were you last night?"
+    ],
+    "game": "a YouTube video"
+   },
+   "out": "[Background Information]\nGame dialogue from a YouTube video.\nSpeaker: unknown. Listener: unknown.\nPrevious lines:\n- Where were you last night?\n\nPlease translate the following text into Vietnamese, taking the provided background information into consideration. Only output the translated result without any additional explanation.\n\n[Source Text]\nI told you, I was working."
+  },
+  {
+   "en": "Get in the car.",
+   "kw": {
+    "speaker": "Lena",
+    "addressee": "Marcus",
+    "self_pron": "anh",
+    "address_pron": "em",
+    "history": [
+     "a",
+     "b",
+     "c",
+     "d",
+     "e",
+     "f"
+    ],
+    "game": "a YouTube video"
+   },
+   "out": "[Background Information]\nGame dialogue from a YouTube video.\nSpeaker: Lena. Listener: Marcus.\nThe speaker calls themself \"anh\" and the listener \"em\".\nPrevious lines:\n- c\n- d\n- e\n- f\n\nPlease translate the following text into Vietnamese, taking the provided background information into consideration. Only output the translated result without any additional explanation.\n\n[Source Text]\nGet in the car."
+  },
+  {
+   "en": "You okay?",
+   "kw": {
+    "speaker": "unknown",
+    "history": [
+     "Everybody down!"
+    ],
+    "game": "a YouTube video"
+   },
+   "out": "[Background Information]\nGame dialogue from a YouTube video.\nSpeaker: unknown. Listener: unknown.\nPrevious lines:\n- Everybody down!\n\nPlease translate the following text into Vietnamese, taking the provided background information into consideration. Only output the translated result without any additional explanation.\n\n[Source Text]\nYou okay?"
+  },
+  {
+   "en": "Drop it.",
+   "kw": {
+    "self_pron": "tao",
+    "game": "a YouTube video"
+   },
+   "out": "[Background Information]\nGame dialogue from a YouTube video.\nSpeaker: unknown. Listener: unknown.\nThe speaker calls themself \"tao\".\n\nPlease translate the following text into Vietnamese, taking the provided background information into consideration. Only output the translated result without any additional explanation.\n\n[Source Text]\nDrop it."
+  },
+  {
+   "en": "Drop it.",
+   "kw": {
+    "address_pron": "mày",
+    "game": "a YouTube video"
+   },
+   "out": "[Background Information]\nGame dialogue from a YouTube video.\nSpeaker: unknown. Listener: unknown.\nThe speaker calls the listener \"mày\".\n\nPlease translate the following text into Vietnamese, taking the provided background information into consideration. Only output the translated result without any additional explanation.\n\n[Source Text]\nDrop it."
+  },
+  {
+   "en": "Welcome to Vice City, buddy.",
+   "kw": {
+    "glossary": {
+     "Vice City": "Vice City",
+     "buddy": "anh bạn"
+    },
+    "game": "Grand Theft Auto VI"
+   },
+   "out": "[Background Information]\nGame dialogue from Grand Theft Auto VI.\nSpeaker: unknown. Listener: unknown.\n\nReference the following translations:\nVice City translates to Vice City\nbuddy translates to anh bạn\n\nPlease translate the following text into Vietnamese, taking the provided background information into consideration. Only output the translated result without any additional explanation.\n\n[Source Text]\nWelcome to Vice City, buddy."
+  },
+  {
+   "en": "Line with\nnewline",
+   "kw": {
+    "history": [
+     "prev\r\nline  two",
+     "",
+     null
+    ],
+    "history_limit": 1,
+    "game": "a YouTube video"
+   },
+   "out": "[Background Information]\nGame dialogue from a YouTube video.\nSpeaker: unknown. Listener: unknown.\nPrevious lines:\n- prev line two\n\nPlease translate the following text into Vietnamese, taking the provided background information into consideration. Only output the translated result without any additional explanation.\n\n[Source Text]\nLine with\nnewline"
+  },
+  {
+   "en": "No history at all",
+   "kw": {
+    "history": [
+     "x"
+    ],
+    "history_limit": 0,
+    "game": "a YouTube video"
+   },
+   "out": "Translate the following text into Vietnamese. Note that you should only output the translated result without any additional explanation:\n\nNo history at all"
+  },
+  {
+   "en": "Price is $&1 and {en}",
+   "kw": {
+    "history": [
+     "$1"
+    ],
+    "game": "a YouTube video"
+   },
+   "out": "[Background Information]\nGame dialogue from a YouTube video.\nSpeaker: unknown. Listener: unknown.\nPrevious lines:\n- $1\n\nPlease translate the following text into Vietnamese, taking the provided background information into consideration. Only output the translated result without any additional explanation.\n\n[Source Text]\nPrice is $&1 and {en}"
+  }
+ ],
+ "clean": [
+  [
+   "[Music]",
+   ""
+  ],
+  [
+   ">> Where were you\nlast night?",
+   "Where were you last night?"
+  ],
+  [
+   "- I told you.",
+   "I told you."
+  ],
+  [
+   "(LAUGHS) No way. ♪",
+   "No way."
+  ],
+  [
+   "♪ ♪",
+   ""
+  ],
+  [
+   "Lucia’s phone “rings”",
+   "Lucia's phone \"rings\""
+  ],
+  [
+   "   spaced    out   ",
+   "spaced out"
+  ]
+ ],
+ "tracks": [
+  {
+   "name": "manual",
+   "body": "{\"events\": [{\"tStartMs\": 0, \"dDurationMs\": 1000, \"id\": 1}, {\"tStartMs\": 1000, \"dDurationMs\": 2000, \"segs\": [{\"utf8\": \"[Music]\"}]}, {\"tStartMs\": 3000, \"dDurationMs\": 2500, \"segs\": [{\"utf8\": \">> Where were you\\nlast night?\"}]}, {\"tStartMs\": 6000, \"dDurationMs\": 2000, \"segs\": [{\"utf8\": \"- I told you, I was working.\"}]}, {\"tStartMs\": 6000, \"dDurationMs\": 2000, \"segs\": [{\"utf8\": \"- I told you, I was working.\"}]}]}",
+   "merge": false,
+   "out": [
+    [
+     3.0,
+     5.5,
+     "Where were you last night?"
+    ],
+    [
+     6.0,
+     8.0,
+     "I told you, I was working."
+    ]
+   ]
+  },
+  {
+   "name": "manual",
+   "body": "{\"events\": [{\"tStartMs\": 0, \"dDurationMs\": 1000, \"id\": 1}, {\"tStartMs\": 1000, \"dDurationMs\": 2000, \"segs\": [{\"utf8\": \"[Music]\"}]}, {\"tStartMs\": 3000, \"dDurationMs\": 2500, \"segs\": [{\"utf8\": \">> Where were you\\nlast night?\"}]}, {\"tStartMs\": 6000, \"dDurationMs\": 2000, \"segs\": [{\"utf8\": \"- I told you, I was working.\"}]}, {\"tStartMs\": 6000, \"dDurationMs\": 2000, \"segs\": [{\"utf8\": \"- I told you, I was working.\"}]}]}",
+   "merge": true,
+   "out": [
+    [
+     3.0,
+     5.5,
+     "Where were you last night?"
+    ],
+    [
+     6.0,
+     8.0,
+     "I told you, I was working."
+    ]
+   ]
+  },
+  {
+   "name": "asr",
+   "body": "{\"events\": [{\"tStartMs\": 0, \"id\": 1}, {\"tStartMs\": 200, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"convolution\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 1200, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"is\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 1400, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"just\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 1600, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"about\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 1800, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"one\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 4300, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"signals\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 4600, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"and\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 4800, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"systems.\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 5000, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"so\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 5300, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"today\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 5600, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"we\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 6600, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"learn\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 6800, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"the\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 7900, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"basics\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 8200, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"of\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 8400, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"it\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 10000, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w0\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 10300, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w1\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 10600, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w2\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 10900, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w3\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 11200, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w4\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 11500, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w5\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 11800, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w6\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 12100, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w7\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 12400, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w8\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 12700, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w9\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 13000, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w10\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 13300, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w11\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 13600, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w12\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 13900, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w13\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 14200, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w14\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 14500, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w15\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 14800, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w16\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 15100, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w17\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 15399, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w18\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 15700, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w19\", \"tOffsetMs\": 0}]}]}",
+   "merge": false,
+   "out": [
+    [
+     0.2,
+     1.2,
+     "convolution"
+    ],
+    [
+     1.2,
+     3.8,
+     "is just about one"
+    ],
+    [
+     4.3,
+     5.0,
+     "signals and systems."
+    ],
+    [
+     5.0,
+     6.6,
+     "so today we"
+    ],
+    [
+     6.6,
+     7.9,
+     "learn the"
+    ],
+    [
+     7.9,
+     10.0,
+     "basics of it"
+    ],
+    [
+     10.0,
+     14.2,
+     "w0 w1 w2 w3 w4 w5 w6 w7 w8 w9 w10 w11 w12 w13"
+    ],
+    [
+     14.2,
+     17.7,
+     "w14 w15 w16 w17 w18 w19"
+    ]
+   ]
+  },
+  {
+   "name": "asr",
+   "body": "{\"events\": [{\"tStartMs\": 0, \"id\": 1}, {\"tStartMs\": 200, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"convolution\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 1200, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"is\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 1400, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"just\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 1600, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"about\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 1800, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"one\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 4300, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"signals\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 4600, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"and\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 4800, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"systems.\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 5000, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"so\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 5300, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"today\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 5600, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"we\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 6600, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"learn\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 6800, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"the\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 7900, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"basics\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 8200, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"of\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 8400, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"it\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 10000, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w0\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 10300, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w1\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 10600, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w2\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 10900, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w3\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 11200, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w4\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 11500, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w5\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 11800, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w6\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 12100, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w7\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 12400, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w8\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 12700, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w9\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 13000, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w10\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 13300, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w11\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 13600, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w12\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 13900, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w13\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 14200, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w14\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 14500, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w15\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 14800, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w16\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 15100, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w17\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 15399, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w18\", \"tOffsetMs\": 0}]}, {\"tStartMs\": 15700, \"dDurationMs\": 500, \"segs\": [{\"utf8\": \"w19\", \"tOffsetMs\": 0}]}]}",
+   "merge": true,
+   "out": [
+    [
+     0.2,
+     3.8,
+     "convolution is just about one"
+    ],
+    [
+     4.3,
+     5.0,
+     "signals and systems."
+    ],
+    [
+     5.0,
+     10.0,
+     "so today we learn the basics of it"
+    ],
+    [
+     10.0,
+     14.2,
+     "w0 w1 w2 w3 w4 w5 w6 w7 w8 w9 w10 w11 w12 w13"
+    ],
+    [
+     14.2,
+     17.7,
+     "w14 w15 w16 w17 w18 w19"
+    ]
+   ]
+  },
+  {
+   "name": "srv3",
+   "body": "<timedtext format=\"3\"><body><p t=\"1000\" d=\"2000\">Get in.</p><p t=\"4000\" d=\"1500\">[Laughs]</p><p t=\"6000\" d=\"1000\">Tom &amp; Jerry&#39;s</p></body></timedtext>",
+   "merge": false,
+   "out": [
+    [
+     1.0,
+     3.0,
+     "Get in."
+    ],
+    [
+     6.0,
+     7.0,
+     "Tom & Jerry's"
+    ]
+   ]
+  },
+  {
+   "name": "srv3",
+   "body": "<timedtext format=\"3\"><body><p t=\"1000\" d=\"2000\">Get in.</p><p t=\"4000\" d=\"1500\">[Laughs]</p><p t=\"6000\" d=\"1000\">Tom &amp; Jerry&#39;s</p></body></timedtext>",
+   "merge": true,
+   "out": [
+    [
+     1.0,
+     3.0,
+     "Get in."
+    ],
+    [
+     6.0,
+     7.0,
+     "Tom & Jerry's"
+    ]
+   ]
+  },
+  {
+   "name": "srv3w",
+   "body": "<timedtext><body><p t=\"1000\"><s t=\"0\">we</s><s t=\"300\"> need</s><s t=\"600\"> a</s><s t=\"900\"> car.</s></p><p t=\"3500\"><s t=\"0\">okay</s></p></body></timedtext>",
+   "merge": false,
+   "out": [
+    [
+     1.0,
+     3.5,
+     "we need a car."
+    ],
+    [
+     3.5,
+     5.5,
+     "okay"
+    ]
+   ]
+  },
+  {
+   "name": "srv3w",
+   "body": "<timedtext><body><p t=\"1000\"><s t=\"0\">we</s><s t=\"300\"> need</s><s t=\"600\"> a</s><s t=\"900\"> car.</s></p><p t=\"3500\"><s t=\"0\">okay</s></p></body></timedtext>",
+   "merge": true,
+   "out": [
+    [
+     1.0,
+     3.5,
+     "we need a car."
+    ],
+    [
+     3.5,
+     5.5,
+     "okay"
+    ]
+   ]
+  }
+ ],
+ "mergeWords": {
+  "words": [
+   [
+    0.2,
+    "convolution"
+   ],
+   [
+    1.2,
+    "is"
+   ],
+   [
+    1.4,
+    "just"
+   ],
+   [
+    1.6,
+    "about"
+   ],
+   [
+    1.8,
+    "one"
+   ],
+   [
+    4.3,
+    "signals"
+   ],
+   [
+    4.6,
+    "and"
+   ],
+   [
+    4.8,
+    "systems."
+   ],
+   [
+    5.0,
+    "so"
+   ],
+   [
+    5.3,
+    "today"
+   ],
+   [
+    5.6,
+    "we"
+   ],
+   [
+    6.6,
+    "learn"
+   ],
+   [
+    6.8,
+    "the"
+   ],
+   [
+    7.9,
+    "basics"
+   ],
+   [
+    8.2,
+    "of"
+   ],
+   [
+    8.4,
+    "it"
+   ],
+   [
+    10.0,
+    "w0"
+   ],
+   [
+    10.3,
+    "w1"
+   ],
+   [
+    10.6,
+    "w2"
+   ],
+   [
+    10.9,
+    "w3"
+   ],
+   [
+    11.2,
+    "w4"
+   ],
+   [
+    11.5,
+    "w5"
+   ],
+   [
+    11.8,
+    "w6"
+   ],
+   [
+    12.1,
+    "w7"
+   ],
+   [
+    12.4,
+    "w8"
+   ],
+   [
+    12.7,
+    "w9"
+   ],
+   [
+    13.0,
+    "w10"
+   ],
+   [
+    13.3,
+    "w11"
+   ],
+   [
+    13.6,
+    "w12"
+   ],
+   [
+    13.9,
+    "w13"
+   ],
+   [
+    14.2,
+    "w14"
+   ],
+   [
+    14.5,
+    "w15"
+   ],
+   [
+    14.8,
+    "w16"
+   ],
+   [
+    15.1,
+    "w17"
+   ],
+   [
+    15.399999999999999,
+    "w18"
+   ],
+   [
+    15.7,
+    "w19"
+   ]
+  ],
+  "plain": [
+   [
+    0.2,
+    1.2,
+    "convolution"
+   ],
+   [
+    1.2,
+    3.8,
+    "is just about one"
+   ],
+   [
+    4.3,
+    5.0,
+    "signals and systems."
+   ],
+   [
+    5.0,
+    6.6,
+    "so today we"
+   ],
+   [
+    6.6,
+    7.9,
+    "learn the"
+   ],
+   [
+    7.9,
+    10.0,
+    "basics of it"
+   ],
+   [
+    10.0,
+    14.2,
+    "w0 w1 w2 w3 w4 w5 w6 w7 w8 w9 w10 w11 w12 w13"
+   ],
+   [
+    14.2,
+    17.7,
+    "w14 w15 w16 w17 w18 w19"
+   ]
+  ],
+  "merge": [
+   [
+    0.2,
+    3.8,
+    "convolution is just about one"
+   ],
+   [
+    4.3,
+    5.0,
+    "signals and systems."
+   ],
+   [
+    5.0,
+    10.0,
+    "so today we learn the basics of it"
+   ],
+   [
+    10.0,
+    14.2,
+    "w0 w1 w2 w3 w4 w5 w6 w7 w8 w9 w10 w11 w12 w13"
+   ],
+   [
+    14.2,
+    17.7,
+    "w14 w15 w16 w17 w18 w19"
+   ]
+  ]
+ },
+ "keyTerms": {
+  "texts": [
+   "convolution is one of the most confusing things",
+   "my analogy involves fireworks and smoke",
+   "each of the fireworks makes smoke",
+   "we write it as a discrete summation",
+   "the discrete summation of",
+   "and in the limit the discrete summation becomes an integral",
+   "that integral is convolution",
+   "so convolution is just this integral",
+   "the fireworks again",
+   "thanks for watching and subscribe",
+   "if you guys liked this video",
+   "hey guys see you next time",
+   "Boobie, huh?",
+   "Ask Boobie.",
+   "Boobie said so.",
+   "Andrés! Andrés!",
+   "Andrés is here"
+  ],
+  "out": [
+   {
+    "en": "discrete summation",
+    "n": 3
+   },
+   {
+    "en": "Boobie",
+    "n": 3
+   },
+   {
+    "en": "convolution",
+    "n": 3
+   },
+   {
+    "en": "Andrés",
+    "n": 3
+   },
+   {
+    "en": "fireworks",
+    "n": 3
+   },
+   {
+    "en": "integral",
+    "n": 3
+   }
+  ]
+ },
+ "learnTerms": {
+  "pairs": [
+   [
+    "the equations are smooth",
+    "các phương trình này mượt"
+   ],
+   [
+    "two equations here",
+    "hai phương trình ở đây"
+   ],
+   [
+    "these equations work",
+    "phương trình này hoạt động"
+   ],
+   [
+    "old equations",
+    "phương trình cũ"
+   ],
+   [
+    "Stokes equations don't care",
+    "Công thức Stokes không quan tâm"
+   ],
+   [
+    "a discrete summation",
+    "một tổng"
+   ],
+   [
+    "the discrete summation",
+    "tổng"
+   ],
+   [
+    "discrete summation x",
+    "tổng x"
+   ],
+   [
+    "discrete summation y",
+    "tổng y"
+   ],
+   [
+    "Navier said",
+    "Navier nói"
+   ],
+   [
+    "Navier again",
+    "Navier lần nữa"
+   ],
+   [
+    "Navier here",
+    "Navier đây"
+   ],
+   [
+    "Navier now",
+    "Navier giờ"
+   ],
+   [
+    "fireworks one",
+    "pháo hoa một"
+   ],
+   [
+    "fireworks two",
+    "pháo hoa hai"
+   ],
+   [
+    "fireworks three",
+    "pháo hoa ba"
+   ],
+   [
+    "fireworks four",
+    "bông hoa bốn"
+   ],
+   [
+    "fireworks five",
+    "pháo hoa năm"
+   ]
+  ],
+  "terms": [
+   {
+    "en": "equations",
+    "n": 5
+   },
+   {
+    "en": "discrete summation",
+    "n": 4
+   },
+   {
+    "en": "Navier",
+    "n": 4
+   },
+   {
+    "en": "fireworks",
+    "n": 5
+   }
+  ],
+  "out": {
+   "equations": {
+    "vi": "phương trình",
+    "support": 4,
+    "lines": 5
+   },
+   "fireworks": {
+    "vi": "pháo hoa",
+    "support": 4,
+    "lines": 5
+   }
+  }
+ },
+ "glossary": {
+  "entries": {
+   "Leonida": "Leonida",
+   "Leonida Keys": "Leonida Keys",
+   "Vice City": "Vice City"
+  },
+  "cases": [
+   [
+    "Welcome to the Leonida Keys, buddy.",
+    {
+     "Leonida Keys": "Leonida Keys"
+    }
+   ],
+   [
+    "vice city never sleeps",
+    {
+     "Vice City": "Vice City"
+    }
+   ],
+   [
+    "Leonidas",
+    {}
+   ],
+   [
+    "Leonida, Vice City and Leonida",
+    {
+     "Leonida": "Leonida",
+     "Vice City": "Vice City"
+    }
+   ]
+  ]
+ },
+ "viewers": [
+  {
+   "lines": [
+    "welcome back to the show",
+    "please subscribe",
+    "so you use the equation for what",
+    "Yes.",
+    "Absolutely.",
+    "and in this video we talk",
+    "Interesting.",
+    "Exactly.",
+    "you guys know this",
+    "Right."
+   ],
+   "conversation": true,
+   "viewers": false
+  },
+  {
+   "lines": [
+    "hey guys welcome back",
+    "today we cook",
+    "if you liked this video subscribe",
+    "see you next time"
+   ],
+   "conversation": false,
+   "viewers": true
+  }
+ ]
+}

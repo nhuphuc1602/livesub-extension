@@ -1,0 +1,8 @@
+livesub
+
+src/words.js lists English words with their Zipf frequencies taken from wordfreq
+(https://github.com/rspeer/wordfreq) by Robyn Speer and contributors. The wordfreq data is licensed under the
+Creative Commons Attribution-ShareAlike 4.0 license (https://creativecommons.org/licenses/by-sa/4.0/); src/words.js is
+an adaptation of it (words with Zipf >= 3.5, rounded to two decimals) and is distributed under the same license.
+
+The Hy-MT prompt layout in src/core.js follows the prompt format of Tencent's Hy-MT2 translation models.

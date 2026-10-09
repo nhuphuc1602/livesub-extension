@@ -1,0 +1,99 @@
+<!doctype html>
+<!-- The content script in a normal page, without Chrome or YouTube: this page stands in for page.js (a caption track
+     made from an .srt) and for chrome.* (settings in memory; "chat" requests sent straight to the endpoint, as the
+     service worker would). Serve the folder with test/serve.py, then open
+       http://localhost:8091/test/harness.html?video=<url>&srt=<url>&endpoint=<OpenAI-compatible base>&model=<name>
+     Optional: &key=, &style=hymt|chat, &title=, &t=<start s>, &showEn=true, &bottom=, &ctx={"self":"mình"} -->
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>livesub harness</title>
+<link rel="stylesheet" href="../src/content.css">
+<style>
+  body { margin: 0; background: #0f0f0f; color: #f1f1f1; font: 14px Roboto, Arial, sans-serif; }
+  #movie_player { position: relative; width: 1120px; height: 630px; margin: 16px auto 8px; background: #000; overflow: hidden; }
+  #movie_player video { width: 100%; height: 100%; display: block; }
+  .bar { width: 1120px; margin: 0 auto; color: #aaa; }
+</style>
+</head>
+<body>
+<div id="movie_player"><video controls muted playsinline></video></div>
+<div class="bar" id="bar"></div>
+<script>
+'use strict';
+const q = new URLSearchParams(location.search);
+const VID = q.get('v') || 'harness0001';
+const v = document.querySelector('video');
+if (q.get('clean')) {                                          // store screenshots: no controls, no status bar
+  v.removeAttribute('controls');
+  document.getElementById('bar').style.display = 'none';
+  document.getElementById('movie_player').style.margin = '0';
+  document.body.style.background = 'transparent';
+}
+v.src = q.get('video') || '';
+if (q.get('t')) v.addEventListener('loadedmetadata', () => { v.currentTime = Number(q.get('t')); }, {once: true});
+
+const sync = {endpoint: q.get('endpoint') || '', model: q.get('model') || '', style: q.get('style') || 'auto'};
+for (const k of ['showEn', 'hideYt', 'size', 'bottom', 'box', 'parallel', 'learnTerms', 'mergeAsr', 'ahead'])
+  if (q.has(k)) sync[k] = isNaN(q.get(k)) ? (q.get(k) === 'true' ? true : q.get(k) === 'false' ? false : q.get(k)) : Number(q.get(k));
+const local = {apiKey: q.get('key') || ''};
+if (q.get('ctx')) local['ctx:v:' + VID] = JSON.parse(q.get('ctx'));
+window.__requests = 0;
+async function chat(body) {                                   // what background.js does
+  const t0 = performance.now();
+  const headers = {'Content-Type': 'application/json'};
+  if (local.apiKey) headers.Authorization = 'Bearer ' + local.apiKey;
+  const r = await fetch(LivesubCore.chatUrl(sync.endpoint), {method: 'POST', headers,
+                        body: JSON.stringify(Object.assign({model: sync.model}, body))});
+  window.__requests++;
+  const j = await r.json();
+  if (!r.ok) return {error: 'HTTP ' + r.status + ': ' + JSON.stringify(j).slice(0, 200)};
+  return {text: j.choices[0].message.content, ms: Math.round(performance.now() - t0)};
+}
+const pick = (keys, obj) => Object.fromEntries([].concat(keys).filter(k => k in obj).map(k => [k, obj[k]]));
+window.chrome = {
+  runtime: {lastError: undefined, onMessage: {addListener(f) { window.__onMessage = f; }},
+            sendMessage: (m, cb) => (m.type === 'chat' ? chat(m.body) : Promise.resolve({error: 'unknown'})).then(cb, e => cb({error: String(e)}))},
+  storage: {
+    sync: {get: (d, cb) => cb(Object.assign({}, d, sync))},
+    local: {get: (k, cb) => cb(typeof k === 'object' && !Array.isArray(k) ? Object.assign({}, k, pick(Object.keys(k), local)) : pick(k, local)),
+            set: (o, cb) => { Object.assign(local, o); cb && cb(); }, remove: (k, cb) => { [].concat(k).forEach(x => delete local[x]); cb && cb(); }},
+    onChanged: {addListener() {}}
+  }
+};
+window.__local = local;
+
+// page.js stand-in: the track the YouTube player would have loaded, made from an .srt
+const ts = s => { const m = s.match(/(\d+):(\d+):(\d+)[,.](\d+)/); return ((+m[1] * 60 + +m[2]) * 60 + +m[3]) * 1000 + +m[4]; };
+let track = null;
+const trackReady = fetch(q.get('srt')).then(r => r.text()).then(srt => {
+  const events = srt.replace(/\r/g, '').split(/\n\n+/).map(b => b.split('\n')).filter(b => b.length >= 3)
+    .map(b => { const [a, z] = b[1].split('-->'); return {tStartMs: ts(a), dDurationMs: ts(z) - ts(a), segs: [{utf8: b.slice(2).join('\n')}]}; });
+  track = JSON.stringify({events});
+});
+window.addEventListener('message', async ev => {
+  const m = ev.data;
+  if (ev.source !== window || !m || m.source !== 'livesub-cs') return;
+  await trackReady;
+  const url = `/api/timedtext?v=${VID}&lang=en`;
+  const reply = d => window.postMessage(Object.assign({source: 'livesub-page', id: m.id}, d), '*');
+  const title = q.get('title') || 'harness';
+  if (m.type === 'info') reply({type: 'info', info: {videoId: VID, title, tracks: [{lang: 'en', kind: '', url}],
+    details: {title, description: q.get('desc') || '', keywords: [], channel: 'harness', channelId: 'UCharness', category: ''}}});
+  else if (m.type === 'captured') reply({type: 'captured', items: [{url, body: track}]});
+  else reply({type: m.type});
+});
+</script>
+<script src="../src/words.js"></script>
+<script src="../src/core.js"></script>
+<script>LivesubCore.videoIdOf = () => VID;   // this page is not /watch?v=...</script>
+<script src="../src/content.js"></script>
+<script>
+const status = () => new Promise(r => window.__onMessage({type: 'status'}, null, r));
+setInterval(async () => {
+  const s = await status();
+  document.getElementById('bar').textContent = `harness · ${v.currentTime.toFixed(1)} s · ${s.status} · requests ${window.__requests}`;
+}, 500);
+</script>
+</body>
+</html>
