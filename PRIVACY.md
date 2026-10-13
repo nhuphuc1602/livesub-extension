@@ -7,7 +7,7 @@
 livesub là extension Chrome dịch phụ đề YouTube sang tiếng Việt bằng dịch vụ AI do **chính bạn** cấu hình.
 
 **Dữ liệu được xử lý**
-- **Chữ phụ đề tiếng Anh của video bạn đang xem** và các thông tin dùng làm ngữ cảnh dịch:
+- **Chữ phụ đề của video bạn đang xem** và các thông tin dùng làm ngữ cảnh dịch:
   - tiêu đề, mô tả, từ khoá, tên kênh của video;
   - các câu trước;
   - cách xưng hô, thuật ngữ bạn nhập.
@@ -36,7 +36,7 @@ không đọc trang nào ngoài `www.youtube.com`, không đọc lịch sử, co
 
 livesub is a Chrome extension that translates YouTube captions into Vietnamese using an AI service **you** configure.
 
-- **Caption text and context, sent only to the AI endpoint you enter.** This covers the English caption text of the video
+- **Caption text and context, sent only to the AI endpoint you enter.** This covers the caption text of the video
   you are watching. It also covers the context used for the translation: the video's title, description, keywords and
   channel name, previous lines, and the pronouns and glossary you enter. How that service stores or uses the data is
   governed by its own policy.

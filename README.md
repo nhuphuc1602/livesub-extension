@@ -1,7 +1,7 @@
-# livesub: phụ đề tiếng Việt cho YouTube
+# livesub: dịch phụ đề YouTube bằng AI
 
-Extension Chrome dịch phụ đề tiếng Anh của video YouTube sang tiếng Việt và hiện ngay trên khung video, cả khi xem
-toàn màn hình. Bạn chọn AI để dịch: OpenAI, Google Gemini, OpenRouter, hoặc model chạy trên máy (Ollama, LM Studio,
+Extension Chrome dịch phụ đề của video YouTube (mặc định tiếng Anh sang tiếng Việt) và hiện ngay trên khung video, cả
+khi xem toàn màn hình. Bạn chọn AI để dịch: OpenAI, Google Gemini, OpenRouter, hoặc model chạy trên máy (Ollama, LM Studio,
 vLLM...), miễn là endpoint theo chuẩn OpenAI `/chat/completions`.
 
 ![Phụ đề tiếng Việt trên video](store/screenshots/1-player.png)
@@ -23,6 +23,21 @@ vLLM...), miễn là endpoint theo chuẩn OpenAI `/chat/completions`.
 - **Sửa câu đang hiện:** câu sửa được giữ lại. Nếu bạn đổi cách xưng hô, app học cho cả video.
 - **Cache:** xem lại video không tốn lượt gọi AI. Cache lưu 60 video gần nhất trên máy bạn.
 
+## Ngôn ngữ
+
+Ngay dưới ô trạng thái của popup:
+
+- **Dịch từ:** phụ đề video đọc theo ngôn ngữ nào. Mặc định tiếng Anh. Chọn **Tự nhận** để dùng ngôn ngữ người trong
+  video nói (theo phụ đề tự động của YouTube), hoặc chọn một ngôn ngữ cụ thể.
+- **Dịch sang:** mặc định tiếng Việt; có tiếng Anh, Trung, Nhật, Hàn, Thái, Indonesia, Pháp, Tây Ban Nha, Đức, Nga...
+  Phụ đề của video đã là ngôn ngữ này thì app không dịch.
+- **Giao diện** (cuối popup): Tiếng Việt, English, hoặc Tự động (theo ngôn ngữ dịch sang nếu giao diện có, không thì theo
+  trình duyệt).
+
+Phần chỉ dành cho tiếng Anh sang tiếng Việt: tự nhận xưng hô "mình" / "các bạn", gợi ý thuật ngữ, tự học thuật ngữ, học
+xưng hô từ câu bạn sửa. Các cặp ngôn ngữ khác vẫn có các câu trước, người nói / nghe và thuật ngữ bạn nhập. Câu sửa được
+lưu riêng cho từng ngôn ngữ dịch sang.
+
 ## Cài đặt
 
 1. Cài từ Chrome Web Store (sắp có), hoặc tải repo này rồi vào `chrome://extensions`, bật **Developer mode**, bấm
@@ -30,7 +45,7 @@ vLLM...), miễn là endpoint theo chuẩn OpenAI `/chat/completions`.
 2. Bấm biểu tượng livesub, mở **Kết nối AI**:
    - chọn một mẫu có sẵn hoặc nhập **Endpoint** (thường kết thúc bằng `/v1`), **API key** (nếu cần) và **Model**;
    - bấm **Lưu và kiểm tra**. Chrome hỏi quyền gọi đúng địa chỉ đó; app thử dịch một câu và báo kết quả.
-3. Mở một video YouTube có phụ đề tiếng Anh.
+3. Mở một video YouTube có phụ đề (mặc định tiếng Anh; đổi ở **Dịch từ**).
 
 | Dịch vụ | Endpoint | Model ví dụ |
 |---|---|---|
@@ -42,7 +57,8 @@ vLLM...), miễn là endpoint theo chuẩn OpenAI `/chat/completions`.
 | vLLM | `http://<máy>:8000/v1` | tên model khi chạy server |
 
 **Kiểu prompt:**
-- **Hy-MT:** dùng đúng định dạng của model Hy-MT2 đã fine-tune cho thoại game (bản dịch livesub).
+- **Hy-MT:** dùng đúng định dạng của model Hy-MT2 đã fine-tune cho thoại game (bản dịch livesub). Với ngôn ngữ đích
+  khác tiếng Việt, chỉ tên ngôn ngữ trong prompt đổi theo.
 - **Chat thường:** cho các model chat khác.
 - **Tự chọn:** dùng Hy-MT khi tên model có "hymt" / "hy-mt", còn lại dùng Chat thường.
 
@@ -70,6 +86,7 @@ python tools/screenshots.py --endpoint ... --model ...   # ảnh chụp 1280x800
 - `src/background.js`: phần duy nhất gọi endpoint.
 - `src/page.js`: chạy trong trang để lấy bài phụ đề mà trình phát YouTube tải.
 - `src/popup.*`: cài đặt.
+- `src/i18n.js`: chữ của popup và trạng thái, tiếng Việt và tiếng Anh. `_locales/`: tên và mô tả extension.
 
 Bảng tần suất từ tiếng Anh `src/words.js` lấy từ [wordfreq](https://github.com/rspeer/wordfreq), giấy phép CC BY-SA 4.0
 (xem [NOTICE](NOTICE)).
@@ -78,9 +95,12 @@ Bảng tần suất từ tiếng Anh `src/words.js` lấy từ [wordfreq](https:
 
 ## English
 
-**livesub** translates the English captions of YouTube videos into Vietnamese with the AI endpoint you choose (any
-OpenAI-compatible `/chat/completions`: OpenAI, Gemini, OpenRouter, Ollama, LM Studio, vLLM) and draws them over the
-player.
+**livesub** translates the captions of YouTube videos with the AI endpoint you choose (any OpenAI-compatible
+`/chat/completions`: OpenAI, Gemini, OpenRouter, Ollama, LM Studio, vLLM) and draws them over the player.
+- **Languages:** English into Vietnamese by default. In the popup, *Translate from* takes a language or *Auto* (the
+  language spoken in the video), *Translate into* takes Vietnamese, English, Chinese, Japanese, Korean, Thai,
+  Indonesian, French, Spanish, German, Russian and more. The interface is in Vietnamese or English. The automatic
+  pronoun pair, term suggestions and term learning work for English into Vietnamese only.
 - **Reads the caption track and translates the whole video ahead:** the lines next to the playback position go first.
 - **Sends each line with its context:** previous lines, pronoun register, your glossary.
 - **Learns how the translations render the video's key terms** and redoes the lines that disagree.

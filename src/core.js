@@ -7,6 +7,9 @@
 //   lines + context               -> requests      previous lines of the same dialogue (4), glossary terms found in
 //                                                   the line, the pronoun pair; Hy-MT prompt or a plain chat prompt
 //   translations                  -> learned terms a term rendered one way most of the time fixes the odd lines
+//
+// Any caption language into any target language; English -> Vietnamese (the default) has the most help: pronoun
+// pair for a host talking to viewers, key terms, learned terms and learned pronouns.
 (function (root) {
   'use strict';
 
@@ -26,9 +29,52 @@
     model: '',
     style: 'auto',                 // auto | hymt | chat
     parallel: 4,                   // requests in flight
-    ahead: 'all'                   // 'all' (translate the whole video ahead) or seconds ahead of playback
+    ahead: 'all',                  // 'all' (translate the whole video ahead) or seconds ahead of playback
+    uiLang: 'auto',                // auto | vi | en (auto: the target language when the UI has it, else the browser's)
+    sourceLang: 'en',              // the captions to read: a language code, or 'auto' (the video's spoken language)
+    targetLang: 'vi'               // the language to translate into
   };
   const GENERAL = 'a YouTube video';
+
+  // --- languages --------------------------------------------------------------------------------------------------
+  // code (as YouTube names caption tracks), English name (for the prompt), own name
+  const LANGS = [['vi', 'Vietnamese', 'Tiếng Việt'], ['en', 'English', 'English'],
+    ['zh-Hans', 'Simplified Chinese', '中文（简体）'], ['zh-Hant', 'Traditional Chinese', '中文（繁體）'],
+    ['ja', 'Japanese', '日本語'], ['ko', 'Korean', '한국어'], ['th', 'Thai', 'ไทย'], ['id', 'Indonesian', 'Bahasa Indonesia'],
+    ['ms', 'Malay', 'Bahasa Melayu'], ['fil', 'Filipino', 'Filipino'], ['hi', 'Hindi', 'हिन्दी'], ['fr', 'French', 'Français'],
+    ['es', 'Spanish', 'Español'], ['pt', 'Portuguese', 'Português'], ['de', 'German', 'Deutsch'], ['it', 'Italian', 'Italiano'],
+    ['nl', 'Dutch', 'Nederlands'], ['pl', 'Polish', 'Polski'], ['ru', 'Russian', 'Русский'], ['uk', 'Ukrainian', 'Українська'],
+    ['tr', 'Turkish', 'Türkçe'], ['ar', 'Arabic', 'العربية']].map(([code, en, own]) => ({code, en, own}));
+  const ZH = {'zh-hans': 'zh-Hans', 'zh-cn': 'zh-Hans', 'zh-sg': 'zh-Hans', 'zh-hant': 'zh-Hant', 'zh-tw': 'zh-Hant',
+              'zh-hk': 'zh-Hant', 'zh-mo': 'zh-Hant'};
+  const OLD = {iw: 'he', in: 'id', tl: 'fil', ji: 'yi'};
+  // "en-GB" -> "en", "zh-TW" -> "zh-Hant", "zh" stays "zh" (either script)
+  function langKey(code) {
+    const c = String(code || '').trim().toLowerCase().replace(/_/g, '-');
+    if (!c) return '';
+    if (c === 'zh' || c.startsWith('zh-')) {
+      return ZH[c] || (/-(?:hant|tw|hk|mo)\b/.test(c) ? 'zh-Hant' : /-(?:hans|cn|sg)\b/.test(c) ? 'zh-Hans' : 'zh');
+    }
+    const base = c.split('-')[0];
+    return OLD[base] || base;
+  }
+  function sameLang(a, b) {
+    const x = langKey(a), y = langKey(b);
+    if (!x || !y) return false;
+    return x === y || (x === 'zh' && y.startsWith('zh')) || (y === 'zh' && x.startsWith('zh'));
+  }
+  const langOf = code => LANGS.find(l => l.code === langKey(code)) || null;
+  function displayName(code, ui) {
+    try { return new Intl.DisplayNames([ui || 'en'], {type: 'language'}).of(code) || null; } catch (e) { return null; }
+  }
+  // the English name the model reads ("Vietnamese"); null for no language
+  function langName(code) {
+    if (!code || code === 'auto') return null;
+    const l = langOf(code);
+    if (l) return l.en;
+    if (langKey(code) === 'zh') return 'Chinese';
+    return displayName(langKey(code), 'en') || String(code);
+  }
 
   // --- caption text ---------------------------------------------------------------------------------------------
   const SOUND = /\[[^\]]*\]|\(\s*[A-Z][A-Z '\-]*\)|[♪♫]+/g;
@@ -36,7 +82,7 @@
     let t = String(text || '').replace(/[’‘]/g, "'").replace(/[“”]/g, '"').replace(/ /g, ' ').replace(/\n/g, ' ');
     t = t.replace(SOUND, ' ').replace(/\s*>>+\s*/g, ' ').replace(/^\s*-\s+/, '');
     t = t.split(/\s+/).filter(Boolean).join(' ');
-    return /[A-Za-z]/.test(t) ? t : '';
+    return /\p{L}/u.test(t) ? t : '';
   }
 
   function manual(items) {
@@ -59,6 +105,10 @@
     'more most less such like going gonna wanna gotta have has had do does did get got make kind sort lot bit one two'
   ).split(' '));
   const lowWord = w => w.toLowerCase().replace(/^[.,?!;:"']+|[.,?!;:"']+$/g, '');
+  // words of an auto-generated track: with spaces, except between Chinese / Japanese / Thai characters
+  const NO_SPACE = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Thai}ー々。、！？]/u;
+  const joinWords = ws => ws.reduce((out, w) =>
+    (!out ? w : NO_SPACE.test(out[out.length - 1]) && NO_SPACE.test(w[0]) ? out + w : out + ' ' + w), '');
 
   // Auto-generated captions: (time, word) -> lines. Default: a line ends at every pause over 0.8 s, at ".?!" (3+
   // words) or at 14 words, so it follows the speech. merge: short lines join the next and a pause right after
@@ -73,7 +123,7 @@
       if (cur.length) {
         const last = cur[cur.length - 1];
         const gap = t - last[0];
-        const endsSentence = /[.?!]$/.test(last[1]) && cur.length >= 3;
+        const endsSentence = /[.?!。？！]$/.test(last[1]) && cur.length >= 3;
         let cut;
         if (!o.merge) cut = gap > o.pause || cur.length >= o.maxWords || endsSentence;
         else cut = gap > o.longPause || endsSentence || cur.length >= o.maxWords ||
@@ -87,7 +137,7 @@
     groups.forEach((g, k) => {
       const first = g[0][0], last = g[g.length - 1][0];
       const next = k + 1 < groups.length ? groups[k + 1][0][0] : last + o.hold;
-      const text = clean(g.map(x => x[1]).join(' '));
+      const text = clean(joinWords(g.map(x => x[1])));
       if (text) out.push({start: first, end: Math.max(Math.min(next, last + o.hold), first + 0.5), text});
     });
     return out;
@@ -290,7 +340,8 @@
   }
 
   // --- the video's context: its details, its captions, the user ----------------------------------------------------
-  function autoContext(details, cues, dflt) {
+  // lang: the captions' language; viewers, conversation and key terms are read from English captions only
+  function autoContext(details, cues, dflt, lang) {
     const d = details || {};
     let game = dflt || GENERAL;
     for (const text of [d.title || '', (d.keywords || []).join(' ').slice(0, 1000), (d.description || '').slice(0, 2000)]) {
@@ -298,7 +349,7 @@
       if (g) { game = g; break; }
     }
     const out = {game};
-    if (cues) {
+    if (cues && (!lang || sameLang(lang, 'en'))) {
       out.viewers = talksToViewers(cues);
       out.conversation = isConversation(cues);
       out.terms = keyTerms(cues.map(c => c.text));
@@ -306,11 +357,11 @@
     return out;
   }
 
-  // the user's fields (popup: channel, then video) over the automatic ones
-  function mergeContext(auto, user) {
+  // the user's fields (popup: channel, then video) over the automatic ones; the automatic pronoun pair is Vietnamese
+  function mergeContext(auto, user, target) {
     const u = Object.assign({}, user || {});
     const userPair = ['speaker', 'listener', 'self', 'address'].some(k => (u[k] || '').trim());
-    const autoPair = auto.viewers && !userPair;
+    const autoPair = auto.viewers && !userPair && (!target || sameLang(target, 'vi'));
     const glossary = parseGlossary(u.glossary);
     const s = (k, n) => (u[k] || '').trim().slice(0, n) || null;
     return {
@@ -351,10 +402,11 @@
   }
 
   // --- prompts --------------------------------------------------------------------------------------------------
-  // Hy-MT2 (Tencent) fine-tuned with this exact layout (byte-identical to the training prompt builder)
-  const PLAIN = 'Translate the following text into Vietnamese. Note that you should only output ' +
+  // Hy-MT2 (Tencent) fine-tuned with this exact layout (byte-identical to the training prompt builder for Vietnamese;
+  // other targets only change the language name)
+  const plain = to => `Translate the following text into ${to}. Note that you should only output ` +
     'the translated result without any additional explanation:\n\n{en}';
-  const CONTEXT_INSTRUCTION = 'Please translate the following text into Vietnamese, taking the provided background ' +
+  const contextInstruction = to => `Please translate the following text into ${to}, taking the provided background ` +
     'information into consideration. Only output the translated result without any additional explanation.';
   const norm = x => { if (x === null || x === undefined) return null; const s = String(x).trim(); return !s || s.toLowerCase() === 'unknown' ? null : s; };
   const oneLine = s => String(s).replace(/\r/g, ' ').replace(/\n/g, ' ').split(/\s+/).filter(Boolean).join(' ');
@@ -366,7 +418,8 @@
     if (limit !== null) hist = limit > 0 ? hist.slice(-limit) : [];
     const gloss = Object.entries(o.glossary || {}).map(([k, v]) => [String(k).trim(), String(v).trim()]).filter(([k, v]) => k && v);
     const spk = norm(o.speaker), adr = norm(o.addressee), selfP = norm(o.self), addrP = norm(o.address);
-    if (!(hist.length || spk || adr || selfP || addrP || gloss.length)) return PLAIN.replace('{en}', () => en);
+    const to = o.target || 'Vietnamese';
+    if (!(hist.length || spk || adr || selfP || addrP || gloss.length)) return plain(to).replace('{en}', () => en);
     const bg = ['[Background Information]', `Game dialogue from ${o.game || GENERAL}.`,
                 `Speaker: ${spk || 'unknown'}. Listener: ${adr || 'unknown'}.`];
     if (selfP && addrP) bg.push(`The speaker calls themself "${selfP}" and the listener "${addrP}".`);
@@ -375,18 +428,21 @@
     if (hist.length) { bg.push('Previous lines:'); hist.forEach(h => bg.push(`- ${h}`)); }
     const blocks = [bg.join('\n')];
     if (gloss.length) blocks.push(['Reference the following translations:', ...gloss.map(([t, v]) => `${t} translates to ${v}`)].join('\n'));
-    blocks.push(CONTEXT_INSTRUCTION);
+    blocks.push(contextInstruction(to));
     blocks.push(`[Source Text]\n${en}`);
     return blocks.join('\n\n');
   }
 
   // any chat model (GPT, Claude, Llama, Qwen...): the same context as instructions
-  const CHAT_SYSTEM = 'You translate English video subtitles into natural, idiomatic Vietnamese subtitles. ' +
-    'Reply with the Vietnamese translation of the line to translate and nothing else: no quotes, no notes, no ' +
-    'English. Keep names as they are unless the glossary says otherwise. Keep it as short as the original so it reads ' +
-    'as a subtitle. Use the context only to understand the line; do not translate the context.';
+  // from: the captions' language (null: not known), to: the target (English -> Vietnamese when not given)
+  const chatSystem = (from, to) => `You translate ${from ? from + ' ' : ''}video subtitles into natural, idiomatic ` +
+    `${to} subtitles. Reply with the ${to} translation of the line to translate and nothing else: no quotes, no notes, ` +
+    `no ${from || 'text in the original language'}. Keep names as they are unless the glossary says otherwise. Keep ` +
+    'it as short as the original so it reads as a subtitle. Use the context only to understand the line; do not ' +
+    'translate the context.';
   function chatMessages(en, o) {
     o = o || {};
+    const from = o.from === undefined ? 'English' : o.from, to = o.to || 'Vietnamese';
     const parts = [`Video: ${o.title || o.game || GENERAL}.`];
     if (o.speaker || o.addressee) parts.push(`Speaker: ${o.speaker || 'unknown'}. Listener: ${o.addressee || 'unknown'}.`);
     if (o.self || o.address) parts.push(`Pronouns: the speaker calls themself "${o.self || '?'}" and the listener "${o.address || '?'}".`);
@@ -395,15 +451,17 @@
     const hist = (o.history || []).slice(-(o.historyLimit || 4));
     if (hist.length) parts.push('Previous lines (context only):\n' + hist.map(h => `- ${oneLine(h)}`).join('\n'));
     parts.push(`Line to translate:\n${en}`);
-    return [{role: 'system', content: CHAT_SYSTEM}, {role: 'user', content: parts.join('\n\n')}];
+    return [{role: 'system', content: chatSystem(from, to)}, {role: 'user', content: parts.join('\n\n')}];
   }
 
   const pickStyle = (style, model) => (style === 'hymt' || style === 'chat') ? style : (/hy-?mt/i.test(model || '') ? 'hymt' : 'chat');
 
-  // the request body (without "model", which the background adds from the settings)
+  // the request body (without "model", which the background adds from the settings); ctx.from / ctx.to: the
+  // English names of the captions' language and of the target (English -> Vietnamese when not set)
   function makeBody(style, item, ctx) {
     const o = {history: item.history, speaker: item.speaker, addressee: item.listener, self: item.self,
-               address: item.address, glossary: item.glossary, game: ctx.game, title: ctx.title};
+               address: item.address, glossary: item.glossary, game: ctx.game, title: ctx.title, from: ctx.from,
+               target: ctx.to, to: ctx.to};
     if (style === 'hymt') {
       return {messages: [{role: 'user', content: hymtPrompt(item.en, o)}], temperature: 0, max_tokens: 160,
               repetition_penalty: 1.05, stream: false};
@@ -411,11 +469,12 @@
     return {messages: chatMessages(item.en, o), temperature: 0, max_tokens: 200, stream: false};
   }
 
-  // a translation as it comes back: one line, no quotes or labels a chat model may add
-  function tidy(text) {
+  // a translation as it comes back: one line, no quotes or labels a chat model may add ("Vietnamese:", "Japanese:")
+  function tidy(text, to) {
     let t = String(text || '').trim().split(/\s*\n\s*/).filter(Boolean)[0] || '';
     t = t.replace(/^(?:vietnamese|tiếng việt|bản dịch|translation)\s*:\s*/i, '');
-    if (/^["“].*["”]$/.test(t)) t = t.slice(1, -1).trim();
+    if (to) t = t.replace(new RegExp(`^${escapeRx(to)}(?: translation)?\\s*:\\s*`, 'i'), '');
+    if (/^["“「].*["”」]$/.test(t)) t = t.slice(1, -1).trim();
     return t;
   }
 
@@ -451,9 +510,19 @@
     for (let i = k; i >= 0 && i >= k - 3; i--) if (t < lines[i].end) return i;
     return -1;
   }
-  function pickTrack(tracks) {
-    const en = (tracks || []).filter(t => /^en/i.test(t.lang || ''));
-    return en.find(t => t.kind !== 'asr') || en.find(t => t.kind === 'asr') || null;
+  // the caption track to translate. source: a language (its own captions, then auto-generated ones) or 'auto': the
+  // language spoken in the video (the auto-generated track's), else the first track not already in the target
+  function pickTrack(tracks, source, target) {
+    const all = (tracks || []).filter(t => t && t.lang);
+    const inLang = lang => {
+      const ts = all.filter(t => sameLang(t.lang, lang));
+      return ts.find(t => t.kind !== 'asr') || ts.find(t => t.kind === 'asr') || null;
+    };
+    if (source === undefined) source = 'en';
+    if (source !== 'auto') return inLang(source);
+    const asr = all.find(t => t.kind === 'asr');
+    if (asr) return inLang(asr.lang);
+    return all.find(t => !sameLang(t.lang, target || 'vi')) || all[0] || null;
   }
   function trackParams(url) {
     try {
@@ -462,9 +531,13 @@
               tlang: u.searchParams.get('tlang')};
     } catch (e) { return null; }
   }
-  function usableTrack(url, videoId) {
+  // a track the player loaded can be used: this video, not YouTube's own translation, in the language wanted (when
+  // not known yet: any language but the target)
+  function usableTrack(url, videoId, want, target) {
     const p = trackParams(url);
-    return !!p && !!videoId && p.v === videoId && /^en/i.test(p.lang) && !p.tlang;
+    if (!p || !videoId || p.v !== videoId || p.tlang || !p.lang) return false;
+    if (want === undefined) want = 'en';
+    return want && want !== 'auto' ? sameLang(p.lang, want) : !sameLang(p.lang, target || 'vi');
   }
   function videoIdOf(href) {
     try { const u = new URL(href); return u.pathname === '/watch' ? u.searchParams.get('v') : null; } catch (e) { return null; }
@@ -485,7 +558,7 @@
     return /\/chat\/completions$/.test(u) ? u : u + '/chat/completions';
   }
 
-  const api = {DEFAULTS, GENERAL, CTX_FIELDS, clean, mergeWords, parseJson3, parseSrv3, parseTrack, gameFor,
+  const api = {DEFAULTS, GENERAL, CTX_FIELDS, LANGS, langKey, sameLang, langName, displayName, clean, mergeWords, parseJson3, parseSrv3, parseTrack, gameFor,
                isConversation, talksToViewers, keyTerms, learnTerms, termRx, parseGlossary, Glossary, autoContext,
                mergeContext, splitSpeaker, planTrack, hymtPrompt, chatMessages, pickStyle, makeBody, tidy, learnedPair,
                findCue, pickTrack, trackParams, usableTrack, videoIdOf, ctxKeys, mergeCtx, chatUrl};

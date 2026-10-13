@@ -1,9 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "livesub - Phụ đề tiếng Việt cho YouTube",
+  "name": "__MSG_appName__",
   "short_name": "livesub",
-  "version": "1.0.0",
-  "description": "Dịch phụ đề tiếng Anh của video YouTube sang tiếng Việt bằng AI bạn chọn, có ngữ cảnh, dịch trước cả video.",
+  "version": "1.1.0",
+  "description": "__MSG_appDesc__",
+  "default_locale": "en",
   "icons": {"16": "icons/16.png", "32": "icons/32.png", "48": "icons/48.png", "128": "icons/128.png"},
   "action": {
     "default_title": "livesub",
@@ -22,7 +23,7 @@
     },
     {
       "matches": ["https://www.youtube.com/*"],
-      "js": ["src/words.js", "src/core.js", "src/content.js"],
+      "js": ["src/words.js", "src/core.js", "src/i18n.js", "src/content.js"],
       "css": ["src/content.css"],
       "run_at": "document_idle"
     }

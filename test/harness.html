@@ -34,7 +34,8 @@ v.src = q.get('video') || '';
 if (q.get('t')) v.addEventListener('loadedmetadata', () => { v.currentTime = Number(q.get('t')); }, {once: true});
 
 const sync = {endpoint: q.get('endpoint') || '', model: q.get('model') || '', style: q.get('style') || 'auto'};
-for (const k of ['showEn', 'hideYt', 'size', 'bottom', 'box', 'parallel', 'learnTerms', 'mergeAsr', 'ahead'])
+for (const k of ['showEn', 'hideYt', 'size', 'bottom', 'box', 'parallel', 'learnTerms', 'mergeAsr', 'ahead', 'sourceLang',
+                 'targetLang', 'uiLang'])
   if (q.has(k)) sync[k] = isNaN(q.get(k)) ? (q.get(k) === 'true' ? true : q.get(k) === 'false' ? false : q.get(k)) : Number(q.get(k));
 const local = {apiKey: q.get('key') || ''};
 if (q.get('ctx')) local['ctx:v:' + VID] = JSON.parse(q.get('ctx'));
@@ -75,10 +76,10 @@ window.addEventListener('message', async ev => {
   const m = ev.data;
   if (ev.source !== window || !m || m.source !== 'livesub-cs') return;
   await trackReady;
-  const url = `/api/timedtext?v=${VID}&lang=en`;
+  const url = `/api/timedtext?v=${VID}&lang=${q.get('lang') || 'en'}`;
   const reply = d => window.postMessage(Object.assign({source: 'livesub-page', id: m.id}, d), '*');
   const title = q.get('title') || 'harness';
-  if (m.type === 'info') reply({type: 'info', info: {videoId: VID, title, tracks: [{lang: 'en', kind: '', url}],
+  if (m.type === 'info') reply({type: 'info', info: {videoId: VID, title, tracks: [{lang: q.get('lang') || 'en', kind: '', url}],
     details: {title, description: q.get('desc') || '', keywords: [], channel: 'harness', channelId: 'UCharness', category: ''}}});
   else if (m.type === 'captured') reply({type: 'captured', items: [{url, body: track}]});
   else reply({type: m.type});
@@ -86,6 +87,7 @@ window.addEventListener('message', async ev => {
 </script>
 <script src="../src/words.js"></script>
 <script src="../src/core.js"></script>
+<script src="../src/i18n.js"></script>
 <script>LivesubCore.videoIdOf = () => VID;   // this page is not /watch?v=...</script>
 <script src="../src/content.js"></script>
 <script>

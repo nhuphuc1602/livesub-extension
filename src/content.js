@@ -1,4 +1,5 @@
-// YouTube watch pages: the English caption track (via page.js) becomes Vietnamese lines drawn over the player.
+// YouTube watch pages: the caption track (via page.js; English by default) becomes lines in the target language
+// (Vietnamese by default) drawn over the player.
 // The translation engine runs here, one per tab: lines are planned with their context (core.js), translated ahead
 // through the service worker (the user's AI endpoint), nearest the playback position first, cached by request,
 // then key terms are learned from the translations and the odd lines are translated again. Videos without a track:
@@ -6,24 +7,20 @@
 (() => {
   'use strict';
   const C = window.LivesubCore;
+  const I = window.LivesubI18n, T = I.t;
   let S = Object.assign({}, C.DEFAULTS);
 
   const st = {gen: 0, vid: null, title: null, details: null, mode: 'idle', status: '', url: null, body: null,
-              job: null, lines: [], cur: -1, live: null, context: null};
+              job: null, lines: [], cur: -1, live: null, context: null, want: null, lang: null};
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const video = () => document.querySelector('#movie_player video') || document.querySelector('video');
   const now = () => { const v = video(); return v ? v.currentTime : 0; };
   const setStatus = s => { st.status = s; };
-  const ERR = {
-    NO_ENDPOINT: 'Chưa có endpoint AI: bấm biểu tượng livesub để nhập',
-    NO_MODEL: 'Chưa nhập tên model (bấm biểu tượng livesub)',
-    NO_PERMISSION: 'Chưa cấp quyền gọi endpoint: mở livesub, bấm "Lưu và kiểm tra"',
-    BAD_ENDPOINT: 'Endpoint không hợp lệ (cần http:// hoặc https://)',
-    TIMEOUT: 'Endpoint không trả lời kịp (quá 45 giây)',
-    RELOADED: 'Extension vừa được cập nhật: tải lại trang (F5)',
-    NO_ANSWER: 'Extension không phản hồi: tải lại trang (F5)'
-  };
-  const errText = e => ERR[e] || (/^NETWORK/.test(e) ? 'Không kết nối được endpoint AI: ' + e.slice(9) : e);
+  const ERR = ['NO_ENDPOINT', 'NO_MODEL', 'NO_PERMISSION', 'BAD_ENDPOINT', 'TIMEOUT', 'RELOADED', 'NO_ANSWER'];
+  const errText = e => (ERR.includes(e) ? T(e) : /^NETWORK/.test(e) ? T('NETWORK', {e: e.slice(9)}) : e);
+  // English -> Vietnamese: the pronoun pair, key terms and learning work there only
+  const toVi = () => C.sameLang(S.targetLang, 'vi');
+  const fixKey = vid => 'fix:' + vid + (toVi() ? '' : ':' + C.langKey(S.targetLang));   // corrections per target
   const BLOCKING = /^(?:NO_ENDPOINT|NO_MODEL|NO_PERMISSION|BAD_ENDPOINT|RELOADED|NO_ANSWER|HTTP 40[0134])/;
 
   // --- page.js (inside the page) -------------------------------------------------------------------------------
@@ -98,7 +95,7 @@
     st.gen++;
     stopJob();
     Object.assign(st, {vid, title: null, details: null, mode: 'idle', status: '', url: null, body: null, lines: [],
-                       cur: -1, live: null, context: null, track: null, askedOnPlay: false});
+                       cur: -1, live: null, context: null, track: null, askedOnPlay: false, want: null, lang: null});
     stopLive();
   }
 
@@ -106,7 +103,7 @@
     reset(vid);
     const gen = st.gen;
     if (!vid) return;
-    if (!S.enabled) { st.mode = 'off'; setStatus('Đang tắt'); return; }
+    if (!S.enabled) { st.mode = 'off'; setStatus(T('off')); return; }
     let info = null;
     for (let i = 0; i < 12 && gen === st.gen; i++) {
       const r = await ask('info');
@@ -117,19 +114,28 @@
     if (gen !== st.gen) return;
     st.title = info && info.title;
     st.details = info && info.videoId === vid ? info.details : {title: st.title || ''};
-    const got = await ask('captured');
-    const have = ((got && got.items) || []).reverse().find(c => C.usableTrack(c.url, vid) && c.body.length > 20);
-    if (have) return openTrack(have.url, have.body);
-    const track = info && info.videoId === vid ? C.pickTrack(info.tracks) : null;
+    const track = info && info.videoId === vid ? C.pickTrack(info.tracks, S.sourceLang, S.targetLang) : null;
     st.track = track;
+    // the captions' language: the one chosen, or the video's (null: not known yet, any but the target)
+    st.want = S.sourceLang !== 'auto' ? S.sourceLang : (track ? track.lang : null);
+    if (st.want && C.sameLang(st.want, S.targetLang)) {
+      st.mode = 'same';
+      setStatus(T('same', {lang: I.langName(C.langKey(S.targetLang))}));
+      return;
+    }
+    const got = await ask('captured');
+    const have = ((got && got.items) || []).reverse()
+      .find(c => C.usableTrack(c.url, vid, st.want, S.targetLang) && c.body.length > 20);
+    if (have) return openTrack(have.url, have.body);
+    const named = st.want ? {lang: I.langName(C.langKey(st.want))} : null;
     if (!track) {
       st.mode = 'live';
-      setStatus('Video không có phụ đề tiếng Anh: dịch từng câu phụ đề đang hiện (nếu có)');
+      setStatus(named ? T('noTrack', named) : T('noTrackAny'));
       startLive();
       return;
     }
     st.mode = 'waiting';
-    setStatus('Đang lấy phụ đề tiếng Anh…');
+    setStatus(named ? T('getting', named) : T('gettingAny'));
     if (S.autoCaptions) await ask('enableCaptions', {lang: track.lang});
     for (let i = 0; i < 10 && gen === st.gen && st.mode === 'waiting'; i++) await sleep(300);
     if (gen !== st.gen || st.mode !== 'waiting') return;
@@ -137,13 +143,14 @@
     if (gen !== st.gen || st.mode !== 'waiting') return;
     if (f && f.body && f.body.length > 20) return openTrack(track.url, f.body);
     st.mode = 'live';
-    setStatus('Không tải được cả bài phụ đề (hãy bật CC): dịch từng câu đang hiện');
+    setStatus(T('noFetch'));
     startLive();
   }
 
   // the player loaded a caption track: also later, once the video plays (autoplay blocked, captions turned on late)
   function onTrackLoaded(url, body) {
-    if (!st.vid || !['waiting', 'live'].includes(st.mode) || !C.usableTrack(url, st.vid) || !body || body.length <= 20) return;
+    if (!st.vid || !['waiting', 'live'].includes(st.mode) || !body || body.length <= 20) return;
+    if (!C.usableTrack(url, st.vid, st.want, S.targetLang)) return;
     stopLive();
     openTrack(url, body);
   }
@@ -153,6 +160,16 @@
     const k = C.ctxKeys(st.vid, st.details && st.details.channelId);
     const got = await sget([k.video, k.channel].filter(Boolean));
     return C.mergeCtx(got[k.channel], got[k.video]);
+  }
+
+  // automatic context (from English captions only) under the user's, and the two languages for the prompt
+  async function contextFor(cues, lang) {
+    const auto = C.autoContext(st.details, cues, C.GENERAL, lang || 'und');      // not known: no English cues
+    const ctx = C.mergeContext(auto, await userContext(), S.targetLang);
+    ctx.title = st.title;
+    ctx.from = C.langName(lang);
+    ctx.to = C.langName(S.targetLang);
+    return ctx;
   }
 
   function contextView(ctx) {
@@ -170,20 +187,21 @@
     stopJob();
     const cues = C.parseTrack(body, S.mergeAsr);
     if (!cues.length) { st.mode = 'live'; startLive(); return; }
-    const ctx = C.mergeContext(C.autoContext(st.details, cues, C.GENERAL), await userContext());
-    ctx.title = st.title;
+    st.lang = (C.trackParams(url) || {}).lang || st.want;
+    const ctx = await contextFor(cues, st.lang);
     const style = C.pickStyle(S.style, S.model);
     const items = C.planTrack(cues, ctx);
     for (const it of items) {
       it.body = C.makeBody(style, it, ctx);
       it.hash = await sha1(JSON.stringify([S.endpoint, S.model, it.body]));
     }
-    const fixKey = 'fix:' + st.vid;
-    const got = await sget(items.map(it => 'c:' + it.hash).concat([fixKey]));
+    const fk = fixKey(st.vid);
+    const got = await sget(items.map(it => 'c:' + it.hash).concat([fk]));
     if (gen !== st.gen) return;
-    const fixes = got[fixKey] || {};
+    const fixes = got[fk] || {};
     const job = {cues, items, ctx, style, results: new Map(), pending: new Set(), inflight: 0, learned: {},
-                 learnDone: false, errors: 0, stopped: false, lastError: null};
+                 learnDone: false, errors: 0, stopped: false, lastError: null,
+                 canLearn: C.sameLang(st.lang, 'en') && toVi()};
     for (const it of items) {
       if (fixes[it.en]) job.results.set(it.i, {vi: fixes[it.en], src: 'corrected'});
       else if (got['c:' + it.hash]) job.results.set(it.i, {vi: got['c:' + it.hash], src: 'cache'});
@@ -235,7 +253,7 @@
         if (it.tries <= 2) { job.pending.add(i); await sleep(1500); } else job.results.set(i, {vi: null, error: r.error});
         continue;
       }
-      const vi = C.tidy(r.text);
+      const vi = C.tidy(r.text, job.ctx.to);
       const res = job.results.get(i);
       if (!(res && res.src === 'corrected')) job.results.set(i, {vi, src: it.learned ? 'learned' : 'model'});
       job.lastError = null;
@@ -245,7 +263,7 @@
 
   // once everything is translated: a key term rendered one way most of the time fixes the lines that differ
   async function maybeLearn(job) {
-    if (!S.learnTerms || job.learnDone || job.stopped || job.pending.size || job.inflight) return;
+    if (!S.learnTerms || !job.canLearn || job.learnDone || job.stopped || job.pending.size || job.inflight) return;
     if (job.results.size < job.items.length || [...job.results.values()].some(r => !r.vi)) return;
     job.learnDone = true;
     const pairs = job.items.filter(it => job.results.get(it.i).src !== 'corrected').map(it => [it.en, job.results.get(it.i).vi]);
@@ -281,9 +299,8 @@
     const done = [...job.results.values()].filter(r => r.vi).length, total = job.items.length;
     if (job.stopped && job.lastError) return errText(job.lastError);
     const fixing = job.learnDone ? job.pending.size + job.inflight : 0;
-    let s = fixing ? `Đã dịch ${done}/${total} câu · đang sửa ${fixing} câu theo thuật ngữ đã học…`
-      : (done >= total ? `Đã dịch ${done}/${total} câu` : `Đang dịch ${done}/${total} câu…`);
-    if (job.lastError) s += ` (lỗi: ${errText(job.lastError)})`;
+    let s = T(fixing ? 'fixing' : done >= total ? 'done' : 'doing', {done, total, n: fixing});
+    if (job.lastError) s += T('errSuffix', {e: errText(job.lastError)});
     return s;
   }
 
@@ -308,8 +325,7 @@
     const gen = st.gen, en = C.clean(t);
     if (!en) return;
     liveCues.push({start: now(), end: now() + 2, text: en});
-    const ctx = C.mergeContext(C.autoContext(st.details, liveCues, C.GENERAL), await userContext());
-    ctx.title = st.title;
+    const ctx = await contextFor(liveCues, st.want);
     st.context = contextView(ctx);
     const item = {en, history: liveHist.slice(-4), speaker: ctx.speaker, listener: ctx.listener, self: ctx.self,
                   address: ctx.address, glossary: new C.Glossary(ctx.glossary).match(en)};
@@ -317,8 +333,8 @@
     const r = await bg({type: 'chat', body: C.makeBody(C.pickStyle(S.style, S.model), item, ctx)});
     if (gen !== st.gen) return;
     if (r.error) { setStatus(errText(r.error)); return; }
-    st.live = {vi: C.tidy(r.text), en: t};
-    setStatus(`Đang dịch từng câu (${liveCues.length} câu)`);
+    st.live = {vi: C.tidy(r.text, ctx.to), en: t};
+    setStatus(T('live', {n: liveCues.length}));
   }
 
   // --- drawing ---------------------------------------------------------------------------------------------
@@ -379,14 +395,14 @@
   // --- corrections from the popup ----------------------------------------------------------------------------
   async function correct(i, vi) {
     const job = st.job;
-    if (!job || !job.items[i]) return {error: 'Không có câu này'};
+    if (!job || !job.items[i]) return {error: T('noLine')};
     const it = job.items[i];
     const before = (job.results.get(i) || {}).vi || '';
     job.results.set(i, {vi, src: 'corrected'});
-    const fk = 'fix:' + st.vid;
+    const fk = fixKey(st.vid);
     const got = await sget(fk);
     await sset({[fk]: Object.assign({}, got[fk] || {}, {[it.en]: vi})});
-    const learned = C.learnedPair(before, vi);
+    const learned = toVi() ? C.learnedPair(before, vi) : {};      // Vietnamese pronouns
     if (Object.keys(learned).length) {                    // kept as the video's pronoun pair: the rest follows it
       const k = C.ctxKeys(st.vid, null).video;
       const cur = (await sget(k))[k] || {};
@@ -403,6 +419,7 @@
 
   chrome.storage.sync.get(C.DEFAULTS, s => {
     S = Object.assign({}, C.DEFAULTS, s);
+    I.use(S);
     check();
   });
   chrome.storage.onChanged.addListener((changes, area) => {
@@ -414,7 +431,9 @@
     }
     const was = S.enabled;
     for (const k in changes) S[k] = changes[k].newValue;
-    if (S.enabled !== was) start(st.vid);
+    I.use(S);
+    if (S.enabled !== was || 'sourceLang' in changes || 'targetLang' in changes) start(st.vid);
+    else if ('uiLang' in changes && ['off', 'same'].includes(st.mode)) start(st.vid);   // their status, in the new language
     else if (['mergeAsr', 'learnTerms', 'endpoint', 'model', 'style', 'parallel'].some(k => k in changes) && st.body) {
       openTrack(st.url, st.body);
     } else if (['endpoint', 'model'].some(k => k in changes) && st.mode !== 'track') start(st.vid);

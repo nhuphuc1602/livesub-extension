@@ -1,0 +1,10 @@
+{
+  "appName": {
+    "message": "livesub - AI subtitle translator for YouTube",
+    "description": "Extension name (Chrome Web Store, chrome://extensions)"
+  },
+  "appDesc": {
+    "message": "Translates YouTube captions into Vietnamese or another language with the AI you choose, with context, the whole video ahead.",
+    "description": "Store summary, 132 characters at most"
+  }
+}

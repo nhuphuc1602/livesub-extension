@@ -1,0 +1,10 @@
+{
+  "appName": {
+    "message": "livesub - Dịch phụ đề YouTube bằng AI",
+    "description": "Extension name (Chrome Web Store, chrome://extensions)"
+  },
+  "appDesc": {
+    "message": "Dịch phụ đề video YouTube sang tiếng Việt hoặc ngôn ngữ khác bằng AI bạn chọn, có ngữ cảnh, dịch trước cả video.",
+    "description": "Store summary, 132 characters at most"
+  }
+}

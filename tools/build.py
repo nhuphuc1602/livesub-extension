@@ -1,4 +1,4 @@
-"""Package the extension for the Chrome Web Store: dist/livesub-<version>.zip with the manifest, src/ and icons/ only
+"""Package the extension for the Chrome Web Store: dist/livesub-<version>.zip with the manifest, _locales/, src/ and icons/ only
 (no tests, tools or store assets). Runs the core tests first when node is available.
 
     python tools/build.py
@@ -10,12 +10,12 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-INCLUDE = ["manifest.json", "src", "icons"]
+INCLUDE = ["manifest.json", "_locales", "src", "icons"]
 
 
 def main():
     manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
-    for f in ["src/" + Path(p).name for p in ("background.js", "core.js", "content.js", "page.js", "popup.js", "words.js")]:
+    for f in ["src/" + Path(p).name for p in ("background.js", "core.js", "content.js", "i18n.js", "page.js", "popup.js", "words.js")]:
         if not (ROOT / f).exists():
             raise SystemExit(f"missing {f}")
     if shutil.which("node"):

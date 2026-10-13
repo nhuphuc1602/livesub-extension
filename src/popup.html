@@ -37,89 +37,98 @@
   .chip:hover { border-color: #3b6df0; }
   a { color: #8fb0ff; }
   body.page { width: auto; max-width: 420px; margin: 24px auto; border-radius: 8px; overflow: hidden; }
+  .langs { align-items: flex-end; } .langs select { width: 100%; }
+  .langs .arrow { flex: 0 0 auto; color: #9aa3b5; padding-bottom: 10px; }
+  .foot { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+  .foot label.ui { margin: 0; gap: 4px; } .foot select { font-size: 11px; padding: 2px 4px; }
 </style>
 </head>
 <body>
-<header><img src="../icons/48.png" alt=""><b>livesub</b><span class="muted" style="margin:0">phụ đề Việt cho YouTube</span>
+<header><img src="../icons/48.png" alt=""><b>livesub</b><span class="muted" style="margin:0" data-i18n="tagline">dịch phụ đề YouTube</span>
   <span class="muted" id="ver" style="margin:0 0 0 auto"></span></header>
 <main>
   <div class="status">
-    <div id="ai">Đang đọc cài đặt…</div>
+    <div id="ai" data-i18n="loading">Đang đọc cài đặt…</div>
     <div id="video" class="t"></div><div id="progress"></div>
     <div id="ctxLine" class="ctxline"></div><div id="learned" class="terms"></div><div id="terms" class="terms"></div>
   </div>
 
+  <div class="two langs">
+    <div class="f"><span data-i18n="from">Dịch từ</span><select id="sourceLang"></select></div>
+    <div class="arrow">→</div>
+    <div class="f"><span data-i18n="to">Dịch sang</span><select id="targetLang"></select></div>
+  </div>
+  <div class="auto" id="langNote" hidden data-i18n="langNote"></div>
+
   <details class="box" id="aiBox">
-    <summary>Kết nối AI</summary>
-    <div class="f"><span>Mẫu có sẵn</span>
+    <summary data-i18n="aiBox">Kết nối AI</summary>
+    <div class="f"><span data-i18n="presets">Mẫu có sẵn</span>
       <select id="preset">
-        <option value="">Chọn để điền nhanh…</option>
+        <option value="" data-i18n="presetPick">Chọn để điền nhanh…</option>
         <option value="https://api.openai.com/v1|gpt-4o-mini">OpenAI</option>
         <option value="https://openrouter.ai/api/v1|openai/gpt-4o-mini">OpenRouter</option>
         <option value="https://generativelanguage.googleapis.com/v1beta/openai|gemini-2.0-flash">Google Gemini (OpenAI-compatible)</option>
-        <option value="http://localhost:11434/v1|qwen2.5:7b">Ollama trên máy này</option>
-        <option value="http://localhost:1234/v1|">LM Studio trên máy này</option>
-        <option value="http://localhost:8000/v1|hymt">vLLM (vd. model Hy-MT)</option>
+        <option value="http://localhost:11434/v1|qwen2.5:7b" data-i18n="presetOllama">Ollama trên máy này</option>
+        <option value="http://localhost:1234/v1|" data-i18n="presetLmStudio">LM Studio trên máy này</option>
+        <option value="http://localhost:8000/v1|hymt" data-i18n="presetVllm">vLLM (vd. model Hy-MT)</option>
       </select></div>
-    <div class="f"><span>Endpoint (OpenAI-compatible, thường kết thúc bằng /v1)</span><input type="text" id="endpoint" spellcheck="false" placeholder="https://api.openai.com/v1"></div>
-    <div class="f"><span>API key (để trống nếu server không cần; chỉ lưu trên máy này)</span><input type="password" id="apiKey" spellcheck="false" autocomplete="off"></div>
+    <div class="f"><span data-i18n="endpoint">Endpoint</span><input type="text" id="endpoint" spellcheck="false" placeholder="https://api.openai.com/v1"></div>
+    <div class="f"><span data-i18n="apiKey">API key</span><input type="password" id="apiKey" spellcheck="false" autocomplete="off"></div>
     <div class="two">
-      <div class="f"><span>Model</span><input type="text" id="model" spellcheck="false" placeholder="gpt-4o-mini"></div>
-      <div class="f"><span>Kiểu prompt</span><select id="style"><option value="auto">Tự chọn</option><option value="hymt">Hy-MT</option><option value="chat">Chat thường</option></select></div>
+      <div class="f"><span data-i18n="model">Model</span><input type="text" id="model" spellcheck="false" placeholder="gpt-4o-mini"></div>
+      <div class="f"><span data-i18n="style">Kiểu prompt</span><select id="style"><option value="auto" data-i18n="styleAuto">Tự chọn</option><option value="hymt">Hy-MT</option><option value="chat" data-i18n="styleChat">Chat thường</option></select></div>
     </div>
     <div class="two">
-      <div class="f"><span>Dịch trước</span><select id="ahead"><option value="all">Cả video</option><option value="300">5 phút tới</option><option value="120">2 phút tới</option></select></div>
-      <div class="f"><span>Số câu dịch cùng lúc</span><input type="number" id="parallel" min="1" max="16"></div>
+      <div class="f"><span data-i18n="ahead">Dịch trước</span><select id="ahead"><option value="all" data-i18n="aheadAll">Cả video</option><option value="300" data-i18n="ahead300">5 phút tới</option><option value="120" data-i18n="ahead120">2 phút tới</option></select></div>
+      <div class="f"><span data-i18n="parallel">Số câu dịch cùng lúc</span><input type="number" id="parallel" min="1" max="16"></div>
     </div>
-    <div><button id="save">Lưu và kiểm tra</button><span class="msg" id="aiMsg"></span></div>
-    <div class="muted">Chrome sẽ hỏi quyền gọi đúng địa chỉ endpoint này. Phụ đề của video và ngữ cảnh được gửi tới endpoint
-      bạn nhập để dịch, không gửi đi đâu khác. "Cả video" gọi AI cho mọi câu ngay khi mở video: nhanh nhất, nhưng tốn
-      lượt gọi hơn nếu bạn trả tiền theo lượt.</div>
+    <div><button id="save" data-i18n="save">Lưu và kiểm tra</button><span class="msg" id="aiMsg"></span></div>
+    <div class="muted" data-i18n="aiNote"></div>
   </details>
 
   <details class="box" id="fixBox">
-    <summary>Sửa câu đang hiện</summary>
-    <div class="auto" id="fixEn">Chưa có câu nào trên màn hình.</div>
+    <summary data-i18n="fixBox">Sửa câu đang hiện</summary>
+    <div class="auto" id="fixEn" data-i18n="fixNone">Chưa có câu nào trên màn hình.</div>
     <textarea id="fixVi" spellcheck="false" style="height:46px;font-family:inherit"></textarea>
-    <div><button id="fixSave">Lưu câu sửa</button> <button class="ghost" id="fixLoad">Lấy câu đang hiện</button></div>
-    <div class="auto" id="fixMsg">Câu sửa thay ngay trên video và được giữ lại. Đổi cách xưng hô (vd. "tôi" thành
-      "mình") thì app học cho cả video.</div>
+    <div><button id="fixSave" data-i18n="fixSave">Lưu câu sửa</button> <button class="ghost" id="fixLoad" data-i18n="fixLoad">Lấy câu đang hiện</button></div>
+    <div class="auto" id="fixMsg" data-i18n="fixHelp"></div>
   </details>
 
-  <label>Bật dịch <input type="checkbox" id="enabled"></label>
-  <label>Hiện cả câu tiếng Anh <input type="checkbox" id="showEn"></label>
-  <label>Ẩn phụ đề gốc của YouTube <input type="checkbox" id="hideYt"></label>
-  <label>Tự bật phụ đề tiếng Anh <input type="checkbox" id="autoCaptions"></label>
-  <label title="Dịch xong cả bài, app xem cách dịch thuật ngữ nào chiếm đa số rồi dịch lại những câu dịch lệch.">Tự học thuật ngữ từ các câu đã dịch <input type="checkbox" id="learnTerms"></label>
-  <label title="Tắt: cắt ở mỗi chỗ người nói ngừng, khớp video. Bật: ghép thành câu dài hơn, đủ ý hơn nhưng có thể lệch lời nói.">Gộp phụ đề tự động thành câu dài <input type="checkbox" id="mergeAsr"></label>
+  <label><span data-i18n="enabled">Bật dịch</span> <input type="checkbox" id="enabled"></label>
+  <label><span data-i18n="showEn">Hiện cả câu gốc</span> <input type="checkbox" id="showEn"></label>
+  <label><span data-i18n="hideYt">Ẩn phụ đề gốc của YouTube</span> <input type="checkbox" id="hideYt"></label>
+  <label><span data-i18n="autoCaptions">Tự bật phụ đề của video</span> <input type="checkbox" id="autoCaptions"></label>
+  <label data-i18n-title="learnTermsTip"><span data-i18n="learnTerms">Tự học thuật ngữ từ các câu đã dịch</span> <input type="checkbox" id="learnTerms"></label>
+  <label data-i18n-title="mergeAsrTip"><span data-i18n="mergeAsr">Gộp phụ đề tự động thành câu dài</span> <input type="checkbox" id="mergeAsr"></label>
   <hr>
-  <label>Cỡ chữ <input type="range" id="size" min="2.5" max="8" step="0.1"></label>
-  <label>Vị trí (cách đáy) <input type="range" id="bottom" min="2" max="40" step="1"></label>
-  <label>Nền chữ <input type="range" id="box" min="0" max="0.9" step="0.05"></label>
-  <label>Màu chữ <input type="color" id="color"></label>
+  <label><span data-i18n="size">Cỡ chữ</span> <input type="range" id="size" min="2.5" max="8" step="0.1"></label>
+  <label><span data-i18n="bottom">Vị trí (cách đáy)</span> <input type="range" id="bottom" min="2" max="40" step="1"></label>
+  <label><span data-i18n="box">Nền chữ</span> <input type="range" id="box" min="0" max="0.9" step="0.05"></label>
+  <label><span data-i18n="color">Màu chữ</span> <input type="color" id="color"></label>
   <hr>
   <details class="box" id="ctxBox">
-    <summary>Ngữ cảnh dịch</summary>
-    <div class="auto" id="auto">Mở một video để xem app tự nhận gì.</div>
+    <summary data-i18n="ctxBox">Ngữ cảnh dịch</summary>
+    <div class="auto" id="auto" data-i18n="ctxOpen">Mở một video để xem app tự nhận gì.</div>
     <div class="scope">
-      <label><input type="radio" name="scope" value="video" checked> Video này</label>
-      <label><input type="radio" name="scope" value="channel"> Cả kênh <span id="chName"></span></label>
+      <label><input type="radio" name="scope" value="video" checked> <span data-i18n="scopeVideo">Video này</span></label>
+      <label><input type="radio" name="scope" value="channel"> <span data-i18n="scopeChannel">Cả kênh</span> <span id="chName"></span></label>
     </div>
-    <div class="f"><span>Bối cảnh (để trống: app tự nhận; video thường là "a YouTube video")</span><input type="text" id="c_game" spellcheck="false"></div>
-    <div class="f two"><div><span>Người nói (cố định)</span><input type="text" id="c_speaker" spellcheck="false"></div>
-                       <div><span>Người nghe</span><input type="text" id="c_listener" spellcheck="false"></div></div>
-    <div class="f two"><div><span>Xưng</span><input type="text" id="c_self" placeholder="mình"></div>
-                       <div><span>Gọi người nghe</span><input type="text" id="c_address" placeholder="các bạn"></div></div>
-    <div class="f"><span>Thuật ngữ: mỗi dòng "English = Tiếng Việt" (giữ nguyên tên: "Vice City = Vice City")</span>
+    <div class="f"><span data-i18n="game">Bối cảnh</span><input type="text" id="c_game" spellcheck="false"></div>
+    <div class="f two"><div><span data-i18n="speaker">Người nói (cố định)</span><input type="text" id="c_speaker" spellcheck="false"></div>
+                       <div><span data-i18n="listener">Người nghe</span><input type="text" id="c_listener" spellcheck="false"></div></div>
+    <div class="f two"><div><span data-i18n="self">Xưng</span><input type="text" id="c_self"></div>
+                       <div><span data-i18n="address">Gọi người nghe</span><input type="text" id="c_address"></div></div>
+    <div class="f"><span data-i18n="glossary">Thuật ngữ</span>
       <textarea id="c_glossary" spellcheck="false" placeholder="convolution = tích chập&#10;turbulence = nhiễu loạn"></textarea></div>
-    <div><button id="apply">Áp dụng</button> <button class="ghost" id="clear">Xoá</button><span class="msg" id="saved"></span></div>
-    <div class="muted">Model chỉ đọc đúng các mục này: bối cảnh, người nói / nghe, cách xưng hô, thuật ngữ và các câu
-      trước. Đổi ngữ cảnh thì chỉ những câu bị ảnh hưởng mới dịch lại.</div>
+    <div><button id="apply" data-i18n="apply">Áp dụng</button> <button class="ghost" id="clear" data-i18n="clear">Xoá</button><span class="msg" id="saved"></span></div>
+    <div class="muted" data-i18n="ctxNote"></div>
   </details>
-  <div class="muted"><a href="https://github.com/nhuphuc1602/livesub-extension#readme" target="_blank">Hướng dẫn</a> ·
-    <a href="https://github.com/nhuphuc1602/livesub-extension/blob/main/PRIVACY.md" target="_blank">Quyền riêng tư</a></div>
+  <div class="muted foot"><span><a href="https://github.com/nhuphuc1602/livesub-extension#readme" target="_blank" data-i18n="guide">Hướng dẫn</a> ·
+    <a href="https://github.com/nhuphuc1602/livesub-extension/blob/main/PRIVACY.md" target="_blank" data-i18n="privacy">Quyền riêng tư</a></span>
+    <label class="ui">🌐 <span data-i18n="uiLang">Giao diện</span> <select id="uiLang"><option value="auto" data-i18n="uiAuto">Tự động</option><option value="vi">Tiếng Việt</option><option value="en">English</option></select></label></div>
 </main>
 <script src="core.js"></script>
+<script src="i18n.js"></script>
 <script src="popup.js"></script>
 </body>
 </html>

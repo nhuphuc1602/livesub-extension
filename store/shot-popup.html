@@ -25,6 +25,7 @@
       <li><b>Ngữ cảnh:</b> các câu trước, cách xưng hô, thuật ngữ của bạn.</li>
       <li><b>Tự học thuật ngữ</b> từ chính các câu đã dịch, sửa câu lệch.</li>
       <li><b>Sửa một câu</b>, app nhớ và áp dụng cho cả video.</li>
+      <li><b>Nhiều ngôn ngữ:</b> mặc định Anh → Việt, chọn được tiếng khác.</li>
     </ul>
   </div>
   <iframe id="p" scrolling="no"></iframe>
@@ -41,7 +42,7 @@ const status = {
         vi: 'Ánh sáng xanh bị tán xạ mất, nên màu đỏ và cam đến được mắt các bạn.'}
 };
 const stub = {
-  runtime: {lastError: undefined, getManifest: () => ({version: '1.0.0'}), sendMessage: (m, cb) => later(() => cb({}))},
+  runtime: {lastError: undefined, getManifest: () => ({version: '1.1.0'}), sendMessage: (m, cb) => later(() => cb({}))},
   storage: {sync: {get: (d, cb) => later(() => cb(Object.assign({}, d, {endpoint: 'https://api.openai.com/v1', model: 'gpt-4o-mini'}))), set: () => {}},
             local: {get: (k, cb) => later(() => cb(typeof k === 'object' && !Array.isArray(k) ? {apiKey: 'sk-demo-key-not-real'} :
                      {'ctx:v:demoVideo01': {glossary: 'Rayleigh scattering = tán xạ Rayleigh'}})), set: (o, cb) => cb && cb(), remove: (k, cb) => cb && cb()}},
@@ -51,9 +52,11 @@ const stub = {
 window.__stub = stub;
 const f = document.getElementById('p');
 fetch('../src/popup.html').then(r => r.text()).then(html => {
-  html = html.replace('<script src="core.js"><\/script>', '').replace('<script src="popup.js"><\/script>', '')
+  html = html.replace('<script src="core.js"><\/script>', '').replace('<script src="i18n.js"><\/script>', '')
+             .replace('<script src="popup.js"><\/script>', '')
              .replace('</body>', '<script>window.chrome = parent.__stub;<\/script>' +
                                   '<script src="../src/words.js"><\/script><script src="../src/core.js"><\/script>' +
+                                  '<script src="../src/i18n.js"><\/script>' +
                                   '<script src="../src/popup.js"><\/script></body>').replace('src="../icons/', 'src="../icons/');
   f.srcdoc = html.replace('<head>', '<head><base href="' + new URL('../src/', location.href) + '">');
 });

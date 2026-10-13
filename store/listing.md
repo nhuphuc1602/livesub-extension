@@ -4,11 +4,14 @@ Package: `python tools/build.py` → `dist/livesub-<version>.zip` (upload this f
 
 ## Store listing
 
-- **Name** (from the manifest): livesub - Phụ đề tiếng Việt cho YouTube
-- **Summary** (from the manifest, 132 characters max): Dịch phụ đề tiếng Anh của video YouTube sang tiếng Việt bằng AI bạn
-  chọn, có ngữ cảnh, dịch trước cả video.
+- **Name and summary** come from `_locales/<lang>/messages.json` (the manifest's `default_locale` is `en`):
+  - English (default): "livesub - AI subtitle translator for YouTube" / "Translates YouTube captions into Vietnamese
+    or another language with the AI you choose, with context, the whole video ahead."
+  - Vietnamese: "livesub - Dịch phụ đề YouTube bằng AI" / "Dịch phụ đề video YouTube sang tiếng Việt hoặc ngôn ngữ
+    khác bằng AI bạn chọn, có ngữ cảnh, dịch trước cả video."
 - **Category:** Accessibility (or Tools)
-- **Language:** Vietnamese (add English if the dashboard asks for a second language)
+- **Language:** English is the default listing; add Vietnamese as a second language and paste the Vietnamese
+  description there.
 - **Icon:** `icons/128.png`
 - **Screenshots (1280x800):** `store/screenshots/1-player.png`, `store/screenshots/2-popup.png`
 - **Small promo tile (440x280):** `store/promo-440x280.png`
@@ -16,7 +19,8 @@ Package: `python tools/build.py` → `dist/livesub-<version>.zip` (upload this f
 
 ### Description (Vietnamese)
 
-livesub dịch phụ đề tiếng Anh của video YouTube sang tiếng Việt và hiện ngay trên khung video, cả khi xem toàn màn hình.
+livesub dịch phụ đề của video YouTube và hiện ngay trên khung video, cả khi xem toàn màn hình. Mặc định dịch tiếng Anh
+sang tiếng Việt.
 
 • Dùng AI bạn chọn: OpenAI, Google Gemini, OpenRouter, hoặc model chạy trên máy (Ollama, LM Studio, vLLM). Endpoint
   nào theo chuẩn OpenAI đều dùng được. Bạn tự nhập endpoint, model và API key.
@@ -29,15 +33,17 @@ livesub dịch phụ đề tiếng Anh của video YouTube sang tiếng Việt v
 • Tự học từ các câu đã dịch: thuật ngữ được dịch một kiểu ở đa số câu thì những câu dịch lệch được dịch lại cho thống nhất.
 • Gợi ý thuật ngữ nổi bật của video để bạn điền nghĩa.
 • Sửa câu đang hiện: câu sửa được giữ lại. Đổi cách xưng hô thì app học cho cả video.
-• Tuỳ chỉnh cỡ chữ, vị trí, nền, màu; hiện kèm câu tiếng Anh; ẩn phụ đề gốc.
+• Nhiều ngôn ngữ: dịch từ tiếng Anh, từ ngôn ngữ của video (tự nhận) hoặc ngôn ngữ bạn chọn; dịch sang tiếng Việt,
+  tiếng Anh, Trung, Nhật, Hàn, Thái, Pháp, Tây Ban Nha, Đức, Nga... Giao diện tiếng Việt hoặc tiếng Anh.
+• Tuỳ chỉnh cỡ chữ, vị trí, nền, màu; hiện kèm câu gốc; ẩn phụ đề gốc.
 
 Quyền riêng tư: phụ đề và ngữ cảnh chỉ được gửi tới endpoint AI bạn nhập. API key chỉ lưu trên máy bạn. Không có thống
 kê, quảng cáo hay máy chủ trung gian.
 
 ### Description (English)
 
-livesub translates the English captions of YouTube videos into Vietnamese and draws them over the player, also in
-full screen.
+livesub translates the captions of YouTube videos and draws them over the player, also in full screen. By default it
+translates English into Vietnamese.
 
 • Uses the AI you choose: OpenAI, Google Gemini, OpenRouter or a local model (Ollama, LM Studio, vLLM), through any
   OpenAI-compatible endpoint. You enter the endpoint, model and API key.
@@ -48,11 +54,14 @@ full screen.
   – your glossary, per video or per channel.
 • Learns how its translations render the video's key terms and redoes the lines that disagree.
 • Keeps your corrections.
+• Languages: from English, from the video's own language (detected) or a language you pick; into Vietnamese, English,
+  Chinese, Japanese, Korean, Thai, French, Spanish, German, Russian and more. Interface in Vietnamese or English.
 • Privacy: captions and context go only to the endpoint you enter; the key stays on your device.
 
 ## Privacy practices tab
 
-- **Single purpose:** Translate the English captions of YouTube videos into Vietnamese and show them over the video.
+- **Single purpose:** Translate the captions of YouTube videos (English into Vietnamese by default, other languages
+  selectable) and show them over the video.
 - **Permission justifications:**
   - `storage`: Saves the user's settings, the translations already made (so a video is not translated twice) and the
     user's corrections and glossary, on the device.
@@ -61,7 +70,7 @@ full screen.
   - Host permission (content scripts on `https://www.youtube.com/*`): Reads the caption track of the video being
     watched and draws the translated line over the player.
   - Optional host permissions (`https://*/*`, `http://*/*`): The user chooses their own AI translation service.
-    Access is requested at runtime for the single origin the user enters, when they press "Lưu và kiểm tra", and is
+    Access is requested at runtime for the single origin the user enters, when they press "Save and test" ("Lưu và kiểm tra"), and is
     used only to send translation requests there.
 - **Remote code:** No. All code is in the package.
 - **Data usage** (check these):

@@ -54,10 +54,10 @@ async function chat(body, timeoutMs) {
 chrome.runtime.onMessage.addListener((m, sender, reply) => {
   (async () => {
     if (m && m.type === 'chat') return chat(m.body);
-    if (m && m.type === 'test') {
-      return chat({messages: [{role: 'user', content: 'Translate the following text into Vietnamese. Note that you ' +
-                   'should only output the translated result without any additional explanation:\n\nGood morning, everyone.'}],
-                   temperature: 0, max_tokens: 40, stream: false}, 20000);
+    if (m && m.type === 'test') {                       // one short line into the target language
+      const {targetLang} = await chrome.storage.sync.get({targetLang: C.DEFAULTS.targetLang});
+      const content = C.hymtPrompt('Good morning, everyone.', {target: C.langName(targetLang)});
+      return chat({messages: [{role: 'user', content}], temperature: 0, max_tokens: 40, stream: false}, 20000);
     }
     throw new Error('unknown request');
   })().then(reply, e => reply({error: String((e && e.message) || e)}));
